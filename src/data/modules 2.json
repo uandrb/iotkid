@@ -1,0 +1,58 @@
+[
+	{
+		"id": "breadboard-mini",
+		"name": "Breadboard mini",
+		"image": "/images/modules/breadboard-mini.svg",
+		"type": "power",
+		"summary": "Bảng cắm thử để nối mạch không cần hàn."
+	},
+	{
+		"id": "day-jumper",
+		"name": "Dây jumper",
+		"image": "/images/modules/day-jumper.svg",
+		"type": "power",
+		"summary": "Dây nối giữa board và linh kiện."
+	},
+	{
+		"id": "led-5mm",
+		"name": "LED 5mm",
+		"image": "/images/modules/led-5mm.svg",
+		"type": "output",
+		"summary": "Đèn báo cơ bản để thực hành bật/tắt."
+	},
+	{
+		"id": "dien-tro-220ohm",
+		"name": "Điện trở 220Ω",
+		"image": "/images/modules/dien-tro.svg",
+		"type": "power",
+		"summary": "Hạn dòng cho LED để bảo vệ chân GPIO."
+	},
+	{
+		"id": "nut-nhan",
+		"name": "Nút nhấn",
+		"image": "/images/modules/nut-nhan.svg",
+		"type": "input",
+		"summary": "Nút nhấn dùng để nhập tín hiệu từ người dùng."
+	},
+	{
+		"id": "bien-tro-10k",
+		"name": "Biến trở 10kΩ",
+		"image": "/images/modules/bien-tro.svg",
+		"type": "input",
+		"summary": "Tạo điện áp thay đổi để đọc analog."
+	},
+	{
+		"id": "dht22",
+		"name": "Cảm biến DHT22",
+		"image": "/images/modules/dht22.svg",
+		"type": "sensor",
+		"summary": "Đo nhiệt độ và độ ẩm không khí."
+	},
+	{
+		"id": "oled-i2c",
+		"name": "Màn OLED I2C",
+		"image": "/images/modules/oled.svg",
+		"type": "output",
+		"summary": "Hiển thị thông tin trạng thái ngay trên mạch."
+	}
+]
