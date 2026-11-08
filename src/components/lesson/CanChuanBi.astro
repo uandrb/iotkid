@@ -1,0 +1,69 @@
+---
+import modulesData from '../../data/modules.json';
+
+interface Props {
+	moduleIds: string[];
+}
+
+interface ModuleItem {
+	id: string;
+	ten: string;
+	icon: string;
+	moTa: string;
+}
+
+const { moduleIds = [] } = Astro.props;
+
+const modulesMap = new Map(
+	(modulesData as ModuleItem[]).map((item) => [item.id, item])
+);
+
+const modules = moduleIds
+	.map((id) => modulesMap.get(id))
+	.filter((item): item is ModuleItem => Boolean(item));
+---
+
+<section class="lesson-block">
+	<h2>Cần chuẩn bị</h2>
+	<div class="module-grid">
+		{
+			modules.map((module) => (
+				<article class="module-card">
+					<img src={module.icon} alt={module.ten} width="160" height="100" loading="lazy" />
+					<h3>{module.ten}</h3>
+					<p>{module.moTa}</p>
+				</article>
+			))
+		}
+	</div>
+</section>
+
+<style>
+	.lesson-block {
+		margin-block: var(--space-3);
+	}
+
+	.module-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.module-card {
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-soft);
+	}
+
+	.module-card h3 {
+		margin: var(--space-1) 0 6px;
+		font-size: var(--text-2);
+	}
+
+	.module-card p {
+		margin: 0;
+		color: var(--color-muted);
+	}
+</style>

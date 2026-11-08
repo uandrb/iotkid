@@ -1,0 +1,196 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { boards, modulesCatalog } from '../lib/catalog';
+
+const categoryMap: Record<string, string> = {
+	'led-dien-tro-220': 'chấp-hành',
+	'nut-nhan': 'cảm-biến',
+	'bien-tro-10k': 'cảm-biến',
+	dht22: 'cảm-biến',
+	'hc-sr04': 'cảm-biến',
+	'oled-ssd1306-i2c': 'hiển-thị',
+	inmp441: 'âm-thanh',
+	max98357a: 'âm-thanh',
+	'loa-4ohm-3w': 'âm-thanh',
+	'relay-1-kenh-cach-ly': 'chấp-hành',
+	'servo-sg90': 'chấp-hành'
+};
+---
+
+<MainLayout title="Linh kiện | Xưởng IoT">
+	<h1>Khu linh kiện</h1>
+	<p class="desc">
+		Chọn board hoặc module để xem chân kết nối, cách dùng và bài học liên quan.
+	</p>
+
+	<section class="filters">
+		<label>
+			<span>Tìm kiếm</span>
+			<input type="search" id="tim-linh-kien" placeholder="Ví dụ: oled, servo, esp32..." />
+		</label>
+		<div class="chip-row" role="tablist" aria-label="Bộ lọc nhóm linh kiện">
+			<button class="chip is-active" data-filter="tat-ca" type="button">Tất cả</button>
+			<button class="chip" data-filter="board" type="button">Board</button>
+			<button class="chip" data-filter="cảm-biến" type="button">Cảm biến</button>
+			<button class="chip" data-filter="hiển-thị" type="button">Hiển thị</button>
+			<button class="chip" data-filter="âm-thanh" type="button">Âm thanh</button>
+			<button class="chip" data-filter="chấp-hành" type="button">Chấp hành</button>
+		</div>
+	</section>
+
+	<section class="grid" id="catalog-grid">
+		{
+			boards.map((board) => (
+				<article
+					class="card"
+					data-cat="board"
+					data-search={`${board.ten} ${board.chip} ${board.moTa}`}
+				>
+					<p class="tag">Board</p>
+					<h2>
+						<a href={`/linh-kien/${board.id}`}>{board.ten}</a>
+					</h2>
+					<p>{board.moTa}</p>
+					<p class="meta">Chip: {board.chip}</p>
+				</article>
+			))
+		}
+		{
+			modulesCatalog.map((item) => (
+				<article
+					class="card"
+					data-cat={categoryMap[item.id] ?? 'khac'}
+					data-search={`${item.ten} ${item.moTa} ${item.tuKhoaTimMua}`}
+				>
+					<p class="tag">{categoryMap[item.id] ?? 'khác'}</p>
+					<h2>
+						<a href={`/linh-kien/${item.id}`}>{item.ten}</a>
+					</h2>
+					<img src={item.icon} alt={item.ten} width="140" height="90" loading="lazy" />
+					<p>{item.moTa}</p>
+					<p class="meta">{item.dienAp}</p>
+				</article>
+			))
+		}
+	</section>
+</MainLayout>
+
+<script>
+	const normalize = (value) =>
+		value
+			.toLowerCase()
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
+			.replace(/đ/g, 'd')
+			.trim();
+
+	const cards = Array.from(document.querySelectorAll('.card'));
+	const chips = Array.from(document.querySelectorAll('.chip'));
+	const input = document.getElementById('tim-linh-kien');
+	let currentFilter = 'tat-ca';
+
+	const update = () => {
+		const term = normalize(input?.value ?? '');
+		cards.forEach((card) => {
+			const cat = card.dataset.cat ?? '';
+			const haystack = normalize(card.dataset.search ?? '');
+			const byFilter = currentFilter === 'tat-ca' || cat === currentFilter;
+			const bySearch = !term || haystack.includes(term);
+			card.style.display = byFilter && bySearch ? '' : 'none';
+		});
+	};
+
+	chips.forEach((chip) => {
+		chip.addEventListener('click', () => {
+			currentFilter = chip.dataset.filter ?? 'tat-ca';
+			chips.forEach((item) => item.classList.remove('is-active'));
+			chip.classList.add('is-active');
+			update();
+		});
+	});
+
+	input?.addEventListener('input', update);
+</script>
+
+<style>
+	.desc {
+		color: var(--color-muted);
+	}
+
+	.filters {
+		display: grid;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+
+	label span {
+		display: block;
+		margin-bottom: 6px;
+		font-weight: 600;
+	}
+
+	input {
+		width: min(460px, 100%);
+		min-height: 44px;
+		padding: 10px 12px;
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+		color: var(--color-text);
+	}
+
+	.chip-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+	}
+
+	.chip {
+		min-height: 40px;
+		padding: 8px 12px;
+		border-radius: 999px;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		cursor: pointer;
+	}
+
+	.chip.is-active {
+		background: color-mix(in srgb, var(--color-accent-teal) 20%, transparent);
+	}
+
+	.grid {
+		margin-top: var(--space-3);
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.card {
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-soft);
+	}
+
+	.card h2 {
+		margin: 6px 0;
+		font-size: var(--text-3);
+	}
+
+	.card h2 a {
+		text-decoration: none;
+	}
+
+	.tag {
+		margin: 0;
+		font-size: var(--text-1);
+		text-transform: capitalize;
+		color: var(--color-muted);
+	}
+
+	.meta {
+		color: var(--color-muted);
+		font-size: var(--text-1);
+	}
+</style>

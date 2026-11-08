@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" role="img" aria-label="Dây jumper">
+  <path d="M20 70 C48 22, 112 22, 140 70" fill="none" stroke="#f28b30" stroke-width="8" stroke-linecap="round"/>
+  <rect x="14" y="62" width="12" height="16" rx="2" fill="#334155"/>
+  <rect x="134" y="62" width="12" height="16" rx="2" fill="#334155"/>
+</svg>

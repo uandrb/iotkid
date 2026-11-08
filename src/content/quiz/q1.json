@@ -1,0 +1,12 @@
+{
+  "id": "q1",
+  "question": "GPIO trên ESP32 có nghĩa là gì?",
+  "options": [
+    { "text": "Chân vào/ra đa năng", "correct": true },
+    { "text": "Bộ nhớ RAM", "correct": false },
+    { "text": "Chuẩn Wi-Fi", "correct": false },
+    { "text": "Tên bootloader", "correct": false }
+  ],
+  "explanation": "GPIO là các chân vào/ra đa năng để đọc và xuất tín hiệu.",
+  "lessonLink": "/bai-hoc/nhay-led"
+}

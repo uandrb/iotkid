@@ -1,0 +1,54 @@
+name: "Đề xuất bài học"
+description: "Đề xuất bài học/dự án mới cho học sinh"
+title: "[Bài học mới]: "
+labels: ["content"]
+body:
+  - type: input
+    id: tieu-de
+    attributes:
+      label: Tên bài học/dự án
+      placeholder: Ví dụ: Điều khiển quạt mini theo nhiệt độ
+    validations:
+      required: true
+
+  - type: dropdown
+    id: muc-do
+    attributes:
+      label: Mức độ
+      options:
+        - Dễ
+        - Vừa
+        - Khó
+    validations:
+      required: true
+
+  - type: textarea
+    id: muc-tieu
+    attributes:
+      label: Mục tiêu học tập
+      description: Học sinh sẽ học được gì sau bài này?
+    validations:
+      required: true
+
+  - type: textarea
+    id: linh-kien
+    attributes:
+      label: Linh kiện cần dùng
+      description: Ghi tên module/board dự kiến dùng.
+      placeholder: ESP32 DevKit V1, DHT22, OLED...
+    validations:
+      required: true
+
+  - type: textarea
+    id: an-toan
+    attributes:
+      label: Lưu ý an toàn
+      description: Nếu có rủi ro điện/nhiệt/cơ khí, vui lòng ghi rõ.
+    validations:
+      required: true
+
+  - type: textarea
+    id: bo-sung
+    attributes:
+      label: Ghi chú bổ sung
+      description: Ý tưởng hoạt động lớp học, hình minh họa, liên kết tài liệu tham khảo.

@@ -1,0 +1,132 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { getProjects } from '../lib/projects';
+
+const projects = await getProjects();
+
+const boardLabel: Record<string, string> = {
+	esp32: 'ESP32',
+	esp32s3: 'ESP32-S3'
+};
+---
+
+<MainLayout title="Dự án | Xưởng IoT">
+	<h1>Khu dự án</h1>
+	<p class="desc">Chọn một dự án vừa sức và làm theo từng bước.</p>
+
+	<section class="filters">
+		<label>
+			<span>Độ khó</span>
+			<select id="filter-level">
+				<option value="all">Tất cả</option>
+				<option value="Dễ">Dễ</option>
+				<option value="Vừa">Vừa</option>
+				<option value="Khó">Khó</option>
+			</select>
+		</label>
+		<label>
+			<span>Board</span>
+			<select id="filter-board">
+				<option value="all">Tất cả</option>
+				<option value="esp32">ESP32</option>
+				<option value="esp32s3">ESP32-S3</option>
+			</select>
+		</label>
+	</section>
+
+	<section class="grid" id="project-grid">
+		{
+			projects.map((project) => (
+				<article class="card" data-level={project.data.level} data-board={project.data.board}>
+					<img src={project.data.anhBia} alt={project.data.title} width="480" height="260" loading="lazy" />
+					<h2>
+						<a href={`/du-an/${project.data.slug}`}>{project.data.title}</a>
+					</h2>
+					<p class="meta">
+						{project.data.level} · {boardLabel[project.data.board]} · {project.data.thoiGian}
+					</p>
+				</article>
+			))
+		}
+	</section>
+</MainLayout>
+
+<script>
+	const level = document.getElementById('filter-level');
+	const board = document.getElementById('filter-board');
+	const cards = Array.from(document.querySelectorAll('.card'));
+
+	const applyFilters = () => {
+		const levelValue = level?.value ?? 'all';
+		const boardValue = board?.value ?? 'all';
+		cards.forEach((card) => {
+			const levelOk = levelValue === 'all' || card.dataset.level === levelValue;
+			const boardOk = boardValue === 'all' || card.dataset.board === boardValue;
+			card.style.display = levelOk && boardOk ? '' : 'none';
+		});
+	};
+	level?.addEventListener('change', applyFilters);
+	board?.addEventListener('change', applyFilters);
+</script>
+
+<style>
+	.desc {
+		color: var(--color-muted);
+	}
+
+	.filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	label span {
+		display: block;
+		margin-bottom: 6px;
+		font-weight: 600;
+	}
+
+	select {
+		min-height: 44px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		padding: 8px 10px;
+	}
+
+	.grid {
+		margin-top: var(--space-3);
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.card {
+		background: var(--color-surface);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		overflow: hidden;
+	}
+
+	.card img {
+		width: 100%;
+		height: auto;
+	}
+
+	.card h2,
+	.card p {
+		margin-inline: var(--space-2);
+	}
+
+	.card h2 {
+		font-size: var(--text-3);
+	}
+
+	.card h2 a {
+		text-decoration: none;
+	}
+
+	.meta {
+		color: var(--color-muted);
+		margin-bottom: var(--space-2);
+	}
+</style>

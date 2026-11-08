@@ -1,0 +1,39 @@
+# Tech Steering
+
+- Nền tảng:
+  - Dùng Astro bản ổn định mới nhất.
+  - Xuất tĩnh với `output: static`.
+  - TypeScript bật `strict`.
+- Quản lý nội dung:
+  - Dùng Astro Content Collections với Markdown/MDX.
+  - Schema nội dung bằng Zod.
+  - Dữ liệu board/linh kiện lưu ở JSON và có schema kiểm tra.
+- Giao diện:
+  - CSS thuần, design tokens tại `src/styles/tokens.css`.
+  - Không dùng Tailwind, không dùng thư viện UI.
+  - Chỉ dùng Preact khi thật cần cho tương tác phức tạp.
+- Font:
+  - Be Vietnam Pro cho nội dung thường.
+  - Một font mono hỗ trợ tiếng Việt cho code.
+  - Tự host bằng `@fontsource`.
+- Dữ liệu phía trình duyệt:
+  - Dùng `localStorage`.
+  - Luôn bọc thao tác đọc/ghi bằng `try/catch`.
+  - Xuất/nhập bài làm dạng JSON có trường `version`.
+- Triển khai:
+  - Hosting bằng Cloudflare Workers Static Assets.
+  - Cấu hình trong `wrangler.jsonc`:
+    - `assets.directory = "./dist"`
+    - `not_found_handling = "404-page"`
+  - Build tự động từ GitHub.
+- Chất lượng:
+  - ESLint + Prettier.
+  - Vitest cho logic.
+  - Playwright cho các luồng chính.
+  - Lighthouse mục tiêu ≥ 90 cho Performance, Accessibility, Best Practices, SEO.
+- Ngân sách hiệu năng:
+  - Mỗi trang bài học < 150 KB JavaScript.
+  - Ảnh ưu tiên SVG hoặc WebP.
+- Bảo mật:
+  - Không đưa API key vào code phía trình duyệt.
+  - Không đưa API key vào Git.

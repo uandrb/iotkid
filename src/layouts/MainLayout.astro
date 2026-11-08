@@ -1,0 +1,87 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'Xưởng IoT - Tự tay làm đồ vật thông minh',
+	description = 'Nền tảng học IoT với ESP32 cho học sinh và giáo viên tại Việt Nam.'
+} = Astro.props;
+
+const navItems = [
+	{ href: '/', label: 'Trang chủ' },
+	{ href: '/lo-trinh', label: 'Lộ trình' },
+	{ href: '/linh-kien', label: 'Linh kiện' },
+	{ href: '/phong-lab', label: 'Phòng Lab' },
+	{ href: '/on-tap', label: 'Ôn tập' },
+	{ href: '/du-an', label: 'Dự án' },
+	{ href: '/tien-do', label: 'Tiến độ của em' },
+	{ href: '/giao-vien', label: 'Góc giáo viên' }
+];
+---
+
+<!doctype html>
+<html lang="vi">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="description" content={description} />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>{title}</title>
+	</head>
+	<body>
+		<a class="skip-link" href="#noi-dung-chinh">Bỏ qua đến nội dung</a>
+		<header class="site-header">
+			<div class="container site-header-inner">
+				<a href="/" class="brand">
+					<span class="brand-mark" aria-hidden="true"></span>
+					<span>Xưởng IoT</span>
+				</a>
+
+				<nav class="desktop-nav" aria-label="Điều hướng chính">
+					<ul>
+						{
+							navItems.map((item) => (
+								<li>
+									<a href={item.href}>{item.label}</a>
+								</li>
+							))
+						}
+					</ul>
+				</nav>
+
+				<nav class="mobile-nav" aria-label="Điều hướng chính trên điện thoại">
+					<details>
+						<summary>Menu</summary>
+						<ul>
+							{
+								navItems.map((item) => (
+									<li>
+										<a href={item.href}>{item.label}</a>
+									</li>
+								))
+							}
+						</ul>
+					</details>
+				</nav>
+			</div>
+		</header>
+		<main id="noi-dung-chinh">
+			<div class="container">
+				<slot />
+			</div>
+		</main>
+		<footer class="site-footer">
+			<div class="container">
+				<p>
+					Mã nguồn mở theo giấy phép MIT · Nội dung theo giấy phép CC BY-SA 4.0 ·
+					<a href="https://github.com/uandrb/iotkid">GitHub dự án</a>
+				</p>
+			</div>
+		</footer>
+	</body>
+</html>

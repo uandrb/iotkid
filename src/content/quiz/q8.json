@@ -1,0 +1,12 @@
+{
+  "id": "q8",
+  "question": "SDA/SCL là hai dây của chuẩn giao tiếp nào?",
+  "options": [
+    { "text": "UART", "correct": false },
+    { "text": "SPI", "correct": false },
+    { "text": "I²C", "correct": true },
+    { "text": "1-Wire", "correct": false }
+  ],
+  "explanation": "I²C dùng hai dây SDA (data) và SCL (clock).",
+  "lessonLink": "/linh-kien/oled-ssd1306-i2c"
+}

@@ -1,0 +1,36 @@
+---
+title: "Báo động cửa mở"
+slug: "bao-dong-cua-mo"
+level: "Vừa"
+board: "esp32"
+modules:
+  - cong-tac-tu-reed
+  - coi-buzzer-3v3
+thoiGian: "90–120 phút"
+anhBia: "/images/projects/bao-dong-cua.svg"
+labPreset: "nut-nhan"
+steps: 7
+danhSachMua:
+  - id: cong-tac-tu-reed
+    soLuong: 1
+  - id: coi-buzzer-3v3
+    soLuong: 1
+---
+
+Mục tiêu là phát hiện khi cửa mở và phát âm báo để nhắc người dùng.
+
+## Các bước ráp chính
+
+- Nối reed switch vào GPIO input và GND (INPUT_PULLUP).
+- Nối còi buzzer vào GPIO output và GND.
+- Đọc trạng thái cửa mở/đóng.
+- Kích hoạt còi theo mẫu nhịp ngắn.
+- Thêm thời gian trễ để tránh báo giả.
+- In log sự kiện mở cửa ra Serial.
+- Đóng gói trong hộp gọn, dễ gắn cạnh cửa.
+
+## Khi làm thật
+
+- Cố định reed switch và nam châm thẳng hàng.
+- Không kéo dây tín hiệu quá dài nếu chưa có chống nhiễu.
+- Hàn mạch ở nơi thoáng, dùng kính bảo hộ khi cần.

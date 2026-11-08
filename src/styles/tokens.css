@@ -1,0 +1,50 @@
+:root {
+	--color-bg: #fff9ee;
+	--color-surface: #fffdf6;
+	--color-text: #113a5c;
+	--color-muted: #4b6980;
+	--color-accent-orange: #f28b30;
+	--color-accent-teal: #1ea89b;
+	--color-success: #1f9d55;
+	--color-warning: #c27a00;
+	--color-error: #c33a2c;
+	--color-border: #d9e2ec;
+
+	--font-sans: 'Be Vietnam Pro', system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI',
+		sans-serif;
+	--font-mono: 'Fira Code', 'SFMono-Regular', menlo, monospace;
+
+	--text-1: 0.875rem;
+	--text-2: 1rem;
+	--text-3: 1.25rem;
+	--text-4: 1.5rem;
+	--text-5: 2rem;
+
+	--space-1: 8px;
+	--space-2: 16px;
+	--space-3: 24px;
+	--space-4: 32px;
+	--space-5: 40px;
+	--space-6: 48px;
+
+	--radius-sm: 10px;
+	--radius-md: 16px;
+	--radius-lg: 24px;
+	--shadow-soft: 0 8px 20px rgb(17 58 92 / 8%);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-bg: #0f1924;
+		--color-surface: #162433;
+		--color-text: #eaf4ff;
+		--color-muted: #b6c9dc;
+		--color-accent-orange: #ffae57;
+		--color-accent-teal: #3ec8bb;
+		--color-success: #4fcc87;
+		--color-warning: #f0bd4f;
+		--color-error: #ff7e72;
+		--color-border: #2d435a;
+		--shadow-soft: 0 10px 20px rgb(0 0 0 / 30%);
+	}
+}

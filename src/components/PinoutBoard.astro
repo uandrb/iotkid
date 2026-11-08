@@ -1,0 +1,201 @@
+---
+import type { Board, BoardPin } from '../lib/schema';
+
+interface Props {
+	board: Board;
+}
+
+const { board } = Astro.props;
+const pinHeight = 28;
+const topOffset = 56;
+const sidePadding = 24;
+const columnWidth = 220;
+const centerGap = 120;
+const maxPins = Math.max(board.chanTrai.length, board.chanPhai.length);
+const bodyHeight = topOffset + maxPins * (pinHeight + 6) + 28;
+const svgWidth = sidePadding * 2 + columnWidth * 2 + centerGap;
+
+const colorByType: Record<BoardPin['loai'], string> = {
+	nguon3v3: '#16a34a',
+	nguon5v: '#dc2626',
+	gnd: '#111827',
+	dieukhien: '#f59e0b',
+	gpio: '#1ea89b'
+};
+
+const labelsByType: Record<BoardPin['loai'], string> = {
+	nguon3v3: 'Nguồn 3.3V',
+	nguon5v: 'Nguồn 5V/VIN',
+	gnd: 'Mass GND',
+	dieukhien: 'Điều khiển/UART',
+	gpio: 'GPIO đa dụng'
+};
+
+function buildDescription(pin: BoardPin): string {
+	const base = pin.gpio === null ? pin.nhan : `${pin.nhan} (GPIO${pin.gpio})`;
+	return `${base} · ${labelsByType[pin.loai]}`;
+}
+---
+
+<section class="pinout">
+	<div class="pinout-scroll">
+		<svg
+			viewBox={`0 0 ${svgWidth} ${bodyHeight}`}
+			class="pinout-svg"
+			role="img"
+			aria-label={`Sơ đồ chân board ${board.ten}`}
+		>
+			<rect x="0" y="0" width={svgWidth} height={bodyHeight} rx="20" class="board-bg" />
+			<text x={svgWidth / 2} y="32" text-anchor="middle" class="title">{board.ten}</text>
+
+			{
+				board.chanTrai.map((pin, index) => {
+					const y = topOffset + index * (pinHeight + 6);
+					return (
+						<g
+							class="pin"
+							tabindex="0"
+							role="button"
+							data-pin={buildDescription(pin)}
+							data-side="trái"
+							aria-label={`Chân trái ${buildDescription(pin)}`}
+						>
+							<rect x={sidePadding} y={y} width={columnWidth} height={pinHeight} rx="8" fill={colorByType[pin.loai]} />
+							<text x={sidePadding + 10} y={y + 18} class="pin-text">
+								{pin.gpio === null ? pin.nhan : `${pin.nhan} / GPIO${pin.gpio}`}
+							</text>
+						</g>
+					);
+				})
+			}
+
+			{
+				board.chanPhai.map((pin, index) => {
+					const y = topOffset + index * (pinHeight + 6);
+					const x = sidePadding + columnWidth + centerGap;
+					return (
+						<g
+							class="pin"
+							tabindex="0"
+							role="button"
+							data-pin={buildDescription(pin)}
+							data-side="phải"
+							aria-label={`Chân phải ${buildDescription(pin)}`}
+						>
+							<rect x={x} y={y} width={columnWidth} height={pinHeight} rx="8" fill={colorByType[pin.loai]} />
+							<text x={x + 10} y={y + 18} class="pin-text">
+								{pin.gpio === null ? pin.nhan : `${pin.nhan} / GPIO${pin.gpio}`}
+							</text>
+						</g>
+					);
+				})
+			}
+		</svg>
+	</div>
+
+	<p class="pin-hint" data-pin-hint>
+		Chọn một chân để xem giải thích chi tiết.
+	</p>
+	<ul class="legend">
+		<li><span class="dot" style="--legend:#16a34a"></span>Nguồn 3.3V</li>
+		<li><span class="dot" style="--legend:#dc2626"></span>Nguồn 5V/VIN</li>
+		<li><span class="dot" style="--legend:#111827"></span>GND</li>
+		<li><span class="dot" style="--legend:#f59e0b"></span>Điều khiển/UART</li>
+		<li><span class="dot" style="--legend:#1ea89b"></span>GPIO đa dụng</li>
+	</ul>
+</section>
+
+<script>
+	document.querySelectorAll('.pinout').forEach((root) => {
+		const hint = root.querySelector('[data-pin-hint]');
+		const pins = root.querySelectorAll('.pin');
+		const updateHint = (pin) => {
+			if (!hint) return;
+			const content = pin.dataset.pin ?? '';
+			const side = pin.dataset.side ?? '';
+			hint.textContent = `Chân bên ${side}: ${content}`;
+		};
+
+		pins.forEach((pin) => {
+			pin.addEventListener('mouseenter', () => updateHint(pin));
+			pin.addEventListener('focus', () => updateHint(pin));
+			pin.addEventListener('click', () => updateHint(pin));
+			pin.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					updateHint(pin);
+				}
+			});
+		});
+	});
+</script>
+
+<style>
+	.pinout-scroll {
+		overflow-x: auto;
+		padding-bottom: var(--space-1);
+	}
+
+	.pinout-svg {
+		min-width: 640px;
+		display: block;
+	}
+
+	.board-bg {
+		fill: var(--color-surface);
+		stroke: var(--color-border);
+	}
+
+	.title {
+		font-size: 14px;
+		fill: var(--color-text);
+		font-weight: 700;
+	}
+
+	.pin {
+		cursor: pointer;
+		outline: none;
+	}
+
+	.pin:focus rect {
+		stroke: #0b1020;
+		stroke-width: 2;
+	}
+
+	.pin-text {
+		font-size: 12px;
+		font-weight: 600;
+		fill: white;
+	}
+
+	.pin-hint {
+		margin: var(--space-2) 0 var(--space-1);
+		padding: 10px 12px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+	}
+
+	.legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.legend li {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.dot {
+		width: 12px;
+		height: 12px;
+		border-radius: 999px;
+		background: var(--legend);
+		border: 1px solid #d1d5db;
+	}
+</style>

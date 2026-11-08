@@ -1,0 +1,50 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { getVisibleLessons } from '../lib/lessons';
+
+const lessons = await getVisibleLessons();
+---
+
+<MainLayout title="Góc giáo viên | Xưởng IoT">
+	<section class="teacher-page">
+		<h1>Góc giáo viên</h1>
+		<p>
+			Gợi ý triển khai tiết học STEM với Xưởng IoT, không cần tài khoản và không dùng máy chủ.
+		</p>
+
+		<h2>1) Tổ chức một tiết học 45 phút</h2>
+		<ul>
+			<li>5 phút: nêu mục tiêu bài và nhắc quy tắc an toàn 3.3V.</li>
+			<li>15 phút: học sinh đọc bài và xem sơ đồ nối dây.</li>
+			<li>15 phút: thực hành trong Phòng Lab, chạy code và tự sửa lỗi.</li>
+			<li>10 phút: học sinh làm quiz, nộp file bài làm để giáo viên chấm.</li>
+		</ul>
+
+		<h2>2) Thu bài không cần tài khoản</h2>
+		<ul>
+			<li>Yêu cầu học sinh vào trang Tiến độ và bấm Xuất bài làm (.xuongiot.json).</li>
+			<li>Nộp file qua kênh lớp: LMS, email lớp, nhóm chat hoặc USB.</li>
+			<li>Giáo viên mở lại bằng chức năng Nhập file trên chính website để xem mạch và code.</li>
+		</ul>
+
+		<h2>3) Phiếu bài tập in cho từng bài</h2>
+		<p>
+			Mỗi phiếu có mục tiêu, chuẩn bị, checklist thực hành và phần ghi chú. Bấm để mở bản in:
+		</p>
+		<ul>
+			{
+				lessons.map((lesson) => (
+					<li>
+						<a href={`/giao-vien/${lesson.data.slug}`}>Phiếu: {lesson.data.order}. {lesson.data.title}</a>
+					</li>
+				))
+			}
+		</ul>
+	</section>
+</MainLayout>
+
+<style>
+	.teacher-page {
+		max-width: 78ch;
+	}
+</style>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" role="img" aria-label="Công tắc từ">
+  <rect x="18" y="38" width="52" height="20" rx="10" fill="#1e293b"/>
+  <rect x="90" y="34" width="50" height="28" rx="6" fill="#dc2626"/>
+  <circle cx="104" cy="48" r="4" fill="#fee2e2"/>
+</svg>

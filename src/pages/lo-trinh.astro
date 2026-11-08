@@ -1,0 +1,102 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { getVisibleLessons } from '../lib/lessons';
+
+const lessons = await getVisibleLessons();
+---
+
+<MainLayout title="Lộ trình | Xưởng IoT">
+	<h1>Lộ trình học IoT</h1>
+	<p class="desc">Mỗi bài là một bước nhỏ. Em cứ đi từng bước, vừa học vừa làm.</p>
+
+	<ol class="roadmap">
+		{
+			lessons.map((lesson) => (
+				<li class="roadmap-item" data-slug={lesson.data.slug}>
+					<p class="order">Bài {lesson.data.order}</p>
+					<h2>
+						<a href={`/bai-hoc/${lesson.data.slug}`}>{lesson.data.title}</a>
+					</h2>
+					<p class="meta">
+						<span>{lesson.data.level}</span> · <span>{lesson.data.durationMinutes} phút</span>
+					</p>
+					<p class="status">
+						Trạng thái: <strong data-status-text>Chưa học</strong>
+					</p>
+				</li>
+			))
+		}
+	</ol>
+</MainLayout>
+
+<script>
+	import { getLessonStatus } from '../lib/progress';
+
+	const statusMap = {
+		'chua-hoc': 'Chưa học',
+		'dang-hoc': 'Đang học',
+		'da-xong': 'Đã xong'
+	};
+
+	document.querySelectorAll('.roadmap-item').forEach((item) => {
+		const slug = item.dataset.slug;
+		if (!slug) return;
+		const status = getLessonStatus(slug);
+		const text = item.querySelector('[data-status-text]');
+		if (text) {
+			text.textContent = statusMap[status];
+		}
+		item.dataset.status = status;
+	});
+</script>
+
+<style>
+	.desc {
+		color: var(--color-muted);
+	}
+
+	.roadmap {
+		margin: var(--space-3) 0 0;
+		padding: 0;
+		list-style: none;
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.roadmap-item {
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		box-shadow: var(--shadow-soft);
+		border-left: 8px solid var(--color-muted);
+	}
+
+	.roadmap-item[data-status='dang-hoc'] {
+		border-left-color: var(--color-warning);
+	}
+
+	.roadmap-item[data-status='da-xong'] {
+		border-left-color: var(--color-success);
+	}
+
+	.order {
+		margin: 0;
+		font-size: var(--text-1);
+		color: var(--color-muted);
+	}
+
+	h2 {
+		margin: 6px 0 4px;
+		font-size: var(--text-3);
+	}
+
+	h2 a {
+		text-decoration: none;
+	}
+
+	.meta,
+	.status {
+		margin: 0;
+	}
+</style>

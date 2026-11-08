@@ -1,0 +1,120 @@
+---
+title: "Bài 3: Biến trở chỉnh độ sáng LED (ADC1 + PWM)"
+slug: "bien-tro-chinh-do-sang"
+order: 3
+level: "Vừa"
+durationMinutes: 55
+board: "esp32"
+modules:
+  - breadboard-mini
+  - day-jumper
+  - led-dien-tro-220
+  - bien-tro-10k
+goals:
+  - Đọc giá trị analog bằng ADC1 trên ESP32.
+  - Dùng PWM để thay đổi độ sáng LED.
+  - "Nắm lưu ý: ADC2 bị giới hạn khi bật Wi-Fi."
+labPreset: "preset-bien-tro-pwm"
+draft: false
+---
+
+<MucTieu items={frontmatter.goals} />
+
+<CanChuanBi moduleIds={frontmatter.modules} />
+
+## Sơ đồ nối dây
+
+<SoDoNoiDay
+  connections={[
+    { tu: "3V3", den: "Biến trở chân ngoài 1" },
+    { tu: "GND", den: "Biến trở chân ngoài 2" },
+    { tu: "GPIO34 (ADC1)", den: "Biến trở chân giữa (wiper)" },
+    { tu: "GPIO2", den: "LED (+) qua điện trở 220Ω" },
+    { tu: "GND", den: "LED (-)" }
+  ]}
+/>
+
+<CanhBao loai="an-toan">
+  GPIO34 thuộc nhóm chỉ đọc. Đây là chân phù hợp cho `analogRead`, không dùng để xuất LED.
+</CanhBao>
+
+<CanhBao loai="meo">
+  Tránh ADC2 khi có Wi-Fi, vì ADC2 có thể không đọc ổn định. Bài này dùng ADC1 để an toàn hơn.
+</CanhBao>
+
+## Code
+
+<Code
+  language="cpp"
+  code={`const int POT_PIN = 34;  // ADC1
+const int LED_PIN = 2;
+const int PWM_CHANNEL = 0;
+const int PWM_FREQ = 5000;
+const int PWM_RES = 8; // 0..255
+
+void setup() {
+  ledcSetup(PWM_CHANNEL, PWM_FREQ, PWM_RES);
+  ledcAttachPin(LED_PIN, PWM_CHANNEL);
+}
+
+void loop() {
+  int adcValue = analogRead(POT_PIN);      // 0..4095
+  int pwmValue = map(adcValue, 0, 4095, 0, 255);
+  ledcWrite(PWM_CHANNEL, pwmValue);
+  delay(20);
+}`}
+/>
+
+<GiaiThichDong
+  items={[
+    { dong: 1, y: "Đọc biến trở ở GPIO34 (ADC1)." },
+    { dong: 5, y: "PWM 8-bit nên giá trị sáng là 0..255." },
+    { dong: 8, y: "Khởi tạo kênh PWM." },
+    { dong: 9, y: "Gắn PWM vào chân LED." },
+    { dong: 13, y: "Đọc ADC 12-bit: 0..4095." },
+    { dong: 14, y: "Quy đổi sang 0..255 cho PWM." },
+    { dong: 15, y: "Ghi PWM để đổi độ sáng LED." }
+  ]}
+/>
+
+<ThuThach hint="Thử thêm lọc trung bình 5 mẫu để độ sáng mượt hơn.">
+  Tạo hiệu ứng “thở” bằng cách đọc biến trở rồi thay đổi độ sáng chậm và mượt.
+</ThuThach>
+
+## Lỗi hay gặp
+
+<CanhBao loai="loi-hay-gap">
+  Nếu đèn không đổi sáng, hãy kiểm tra chân giữa biến trở đã nối đúng vào GPIO34 chưa.
+</CanhBao>
+
+## Quiz 3 câu
+
+<Quiz
+  lessonSlug={frontmatter.slug}
+  quizId="quiz-bai-3"
+  questions={[
+    {
+      id: "q1",
+      question: "Giá trị analogRead trên ESP32 (mặc định) thường trong khoảng nào?",
+      options: ["0..255", "0..1023", "0..4095"],
+      answerIndex: 2,
+      explanation: "ESP32 thường đọc ADC 12-bit nên khoảng là 0..4095."
+    },
+    {
+      id: "q2",
+      question: "GPIO34-39 có đặc điểm gì?",
+      options: ["Chỉ đọc tín hiệu", "Chỉ xuất PWM", "Dành riêng cho I2C"],
+      answerIndex: 0,
+      explanation: "Đó là các chân input-only trên ESP32 DevKit V1."
+    },
+    {
+      id: "q3",
+      question: "Khi bật Wi-Fi, nhóm ADC nào cần thận trọng?",
+      options: ["ADC1", "ADC2", "Cả hai nhóm đều như nhau"],
+      answerIndex: 1,
+      explanation: "ADC2 có thể bị xung đột tài nguyên khi Wi-Fi hoạt động."
+    }
+  ]}
+/>
+
+<MoTrongLab preset={frontmatter.labPreset} />

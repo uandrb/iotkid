@@ -1,0 +1,35 @@
+---
+title: "Đèn ngủ tự bật theo ánh sáng"
+slug: "den-ngu-tu-bat"
+level: "Dễ"
+board: "esp32"
+modules:
+  - led-dien-tro-220
+  - cam-bien-anh-sang-ldr
+thoiGian: "60–90 phút"
+anhBia: "/images/projects/den-ngu.svg"
+labPreset: "bien-tro"
+steps: 6
+danhSachMua:
+  - id: led-dien-tro-220
+    soLuong: 2
+  - id: cam-bien-anh-sang-ldr
+    soLuong: 1
+---
+
+Đây là dự án đầu tay để em hiểu cảm biến môi trường có thể điều khiển đèn tự động.
+
+## Các bước ráp chính
+
+- Cấp nguồn 3.3V và GND cho module cảm biến ánh sáng.
+- Nối ngõ AO của cảm biến vào chân ADC1 (gợi ý GPIO34).
+- Nối LED vào một chân output (gợi ý GPIO2) và GND.
+- Đọc giá trị ánh sáng, đặt ngưỡng tối/sáng.
+- Bật LED khi thấp hơn ngưỡng.
+- In giá trị lên Serial để tự hiệu chỉnh.
+
+## Khi làm thật
+
+- Luôn dùng mức logic 3.3V cho GPIO.
+- Dây cảm biến nên ngắn để số đo ổn định.
+- Nếu làm hộp đèn, cần có khe thoáng và tránh che cảm biến.

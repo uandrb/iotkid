@@ -1,0 +1,140 @@
+---
+interface QuizQuestion {
+	id: string;
+	question: string;
+	options: string[];
+	answerIndex: number;
+	explanation: string;
+}
+
+interface Props {
+	lessonSlug: string;
+	quizId: string;
+	questions: QuizQuestion[];
+}
+
+const { lessonSlug, quizId, questions = [] } = Astro.props;
+const safeId = `quiz-${quizId.replace(/[^a-zA-Z0-9-_]/g, '-')}`;
+---
+
+<section class="quiz" id={safeId} data-lesson={lessonSlug} data-quiz-id={quizId}>
+	<h2>Quiz 3 câu</h2>
+	{
+		questions.length !== 3 && (
+			<p class="quiz-warning">TODO: Quiz nên có đúng 3 câu để đúng định dạng bài học.</p>
+		)
+	}
+	<form>
+		{
+			questions.map((item, index) => (
+				<fieldset data-answer={item.answerIndex} data-explanation={item.explanation}>
+					<legend>
+						Câu {index + 1}: {item.question}
+					</legend>
+					{
+						item.options.map((option, optionIndex) => (
+							<label>
+								<input type="radio" name={`q-${index}`} value={optionIndex} />
+								<span>{option}</span>
+							</label>
+						))
+					}
+				</fieldset>
+			))
+		}
+		<button type="submit">Chấm điểm ngay</button>
+	</form>
+	<p class="result" aria-live="polite"></p>
+	<div class="explanations"></div>
+</section>
+
+<script>
+	import { saveQuizResult } from '../../lib/progress';
+
+	document.querySelectorAll('.quiz').forEach((quizRoot) => {
+		const lessonSlug = quizRoot.dataset.lesson ?? '';
+		const quizId = quizRoot.dataset.quizId ?? 'quiz';
+		const form = quizRoot.querySelector('form');
+		const result = quizRoot.querySelector('.result');
+		const explanations = quizRoot.querySelector('.explanations');
+
+		if (!form || !result || !explanations) return;
+
+		form.addEventListener('submit', (event) => {
+			event.preventDefault();
+			const fieldsets = Array.from(form.querySelectorAll('fieldset'));
+			let score = 0;
+			const answers: number[] = [];
+			explanations.innerHTML = '';
+
+			fieldsets.forEach((fieldset, index) => {
+				const checked = fieldset.querySelector(`input[name="q-${index}"]:checked`);
+				const answer = Number(fieldset.dataset.answer);
+				const explanation = fieldset.dataset.explanation ?? '';
+				const selected = checked ? Number(checked.value) : -1;
+				answers.push(selected);
+				if (selected === answer) {
+					score += 1;
+				}
+				const p = document.createElement('p');
+				p.innerHTML = `<strong>Câu ${index + 1}:</strong> ${explanation}`;
+				explanations.appendChild(p);
+			});
+
+			result.textContent = `Em đúng ${score}/${fieldsets.length} câu.`;
+			saveQuizResult({
+				lessonSlug,
+				quizId,
+				score,
+				total: fieldsets.length,
+				answers
+			});
+		});
+	});
+</script>
+
+<style>
+	.quiz {
+		margin-block: var(--space-3);
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+	}
+
+	form {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	fieldset {
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		padding: var(--space-2);
+	}
+
+	label {
+		display: flex;
+		gap: 8px;
+		margin-top: 8px;
+	}
+
+	button {
+		min-height: 44px;
+		border-radius: var(--radius-sm);
+		border: 0;
+		background: var(--color-accent-orange);
+		color: #2a1200;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.result {
+		font-weight: 700;
+	}
+
+	.quiz-warning {
+		color: var(--color-warning);
+		font-weight: 600;
+	}
+</style>

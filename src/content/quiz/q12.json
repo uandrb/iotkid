@@ -1,0 +1,12 @@
+{
+  "id": "q12",
+  "question": "Nếu LED không sáng trong bài nháy LED, bước kiểm tra đầu tiên nên là:",
+  "options": [
+    { "text": "Đổi ngay sang board mới", "correct": false },
+    { "text": "Kiểm tra cực LED và dây GND", "correct": true },
+    { "text": "Xóa toàn bộ code", "correct": false },
+    { "text": "Tăng lên 12V", "correct": false }
+  ],
+  "explanation": "Lỗi phổ biến nhất là cắm ngược cực hoặc thiếu dây mass.",
+  "lessonLink": "/bai-hoc/nhay-led"
+}

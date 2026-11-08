@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" role="img" aria-label="Trạm thời tiết mini">
+  <rect width="480" height="260" rx="24" fill="#e0f2fe"/>
+  <rect x="70" y="70" width="150" height="120" rx="14" fill="#0ea5e9"/>
+  <rect x="260" y="80" width="150" height="90" rx="10" fill="#1e293b"/>
+  <text x="335" y="128" text-anchor="middle" fill="#22d3ee" font-size="24">27.5°C</text>
+  <circle cx="120" cy="48" r="18" fill="#fbbf24"/>
+</svg>

@@ -1,0 +1,36 @@
+---
+title: "Trạm thời tiết mini"
+slug: "tram-thoi-tiet-mini"
+level: "Vừa"
+board: "esp32"
+modules:
+  - dht22
+  - oled-ssd1306-i2c
+thoiGian: "90–120 phút"
+anhBia: "/images/projects/tram-thoi-tiet.svg"
+labPreset: "tram-thoi-tiet"
+steps: 7
+danhSachMua:
+  - id: dht22
+    soLuong: 1
+  - id: oled-ssd1306-i2c
+    soLuong: 1
+---
+
+Em sẽ xây một trạm nhỏ đo nhiệt độ và độ ẩm rồi hiển thị ngay trên màn OLED.
+
+## Các bước ráp chính
+
+- Nối DHT22: VCC, GND, DATA.
+- Nối OLED I²C: VCC, GND, SDA, SCL.
+- Kiểm tra địa chỉ I²C màn hình.
+- Viết code đọc dữ liệu DHT22 theo chu kỳ hợp lý.
+- Hiển thị số đo trên OLED.
+- In thêm log ra Serial.
+- Đặt lại bố cục hiển thị cho dễ đọc.
+
+## Khi làm thật
+
+- DHT22 cần thời gian đọc, không nên đọc quá nhanh.
+- Tránh đặt cảm biến sát nguồn nhiệt (đèn, cổng USB nóng).
+- Nếu làm hộp, nhớ khoét khe khí cho cảm biến.

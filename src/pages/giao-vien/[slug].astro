@@ -1,0 +1,107 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getVisibleLessons } from '../../lib/lessons';
+
+export async function getStaticPaths() {
+	const lessons = await getVisibleLessons();
+	return lessons.map((lesson) => ({
+		params: { slug: lesson.data.slug },
+		props: { lesson }
+	}));
+}
+
+const { lesson } = Astro.props;
+---
+
+<MainLayout title={`Phiếu bài tập: ${lesson.data.title} | Góc giáo viên`}>
+	<article class="sheet">
+		<header>
+			<h1>Phiếu bài tập: {lesson.data.title}</h1>
+			<p>Bài {lesson.data.order} · Mức độ {lesson.data.level} · Thời lượng {lesson.data.durationMinutes} phút</p>
+		</header>
+
+		<section>
+			<h2>Mục tiêu bài học</h2>
+			<ul>
+				{lesson.data.goals.map((goal: string) => <li>{goal}</li>)}
+			</ul>
+		</section>
+
+		<section>
+			<h2>Checklist thực hành</h2>
+			<ul class="checklist">
+				<li><span class="box"></span> Em đã đọc sơ đồ nối dây và kiểm tra cực nguồn.</li>
+				<li><span class="box"></span> Em đã nối mạch ảo và chạy code trong Phòng Lab.</li>
+				<li><span class="box"></span> Em đã sửa lỗi và chạy lại thành công.</li>
+				<li><span class="box"></span> Em đã hoàn thành quiz 3 câu cuối bài.</li>
+			</ul>
+		</section>
+
+		<section>
+			<h2>Ghi chú của giáo viên</h2>
+			<div class="note-lines"></div>
+		</section>
+
+		<section>
+			<h2>Cách thu bài</h2>
+			<p>Học sinh xuất file .xuongiot.json ở trang Tiến độ và nộp qua kênh của lớp.</p>
+		</section>
+	</article>
+</MainLayout>
+
+<style>
+	.sheet {
+		max-width: 78ch;
+		margin: 0 auto;
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.checklist {
+		list-style: none;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+	}
+
+	.box {
+		display: inline-block;
+		inline-size: 16px;
+		block-size: 16px;
+		border: 1px solid currentcolor;
+		margin-right: 8px;
+		vertical-align: text-bottom;
+	}
+
+	.note-lines {
+		min-height: 180px;
+		background-image: linear-gradient(to bottom, transparent 31px, var(--color-border) 32px);
+		background-size: 100% 32px;
+	}
+
+	@media print {
+		.site-header,
+		.site-footer,
+		.skip-link {
+			display: none !important;
+		}
+
+		main {
+			padding: 0;
+		}
+
+		.sheet {
+			border: none;
+			border-radius: 0;
+			padding: 0;
+			max-width: none;
+			box-shadow: none;
+		}
+
+		a::after {
+			content: '';
+		}
+	}
+</style>

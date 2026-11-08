@@ -1,0 +1,181 @@
+@import '@fontsource/be-vietnam-pro/400.css';
+@import '@fontsource/be-vietnam-pro/500.css';
+@import '@fontsource/be-vietnam-pro/700.css';
+@import '@fontsource/fira-code/400.css';
+@import '@fontsource/fira-code/500.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	color-scheme: light dark;
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: var(--text-2);
+	line-height: 1.55;
+}
+
+a {
+	color: inherit;
+}
+
+img,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+code,
+pre {
+	font-family: var(--font-mono);
+}
+
+.container {
+	width: min(1120px, calc(100% - 2 * var(--space-2)));
+	margin-inline: auto;
+}
+
+.skip-link {
+	position: absolute;
+	left: var(--space-2);
+	top: -60px;
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--radius-sm);
+	background: var(--color-accent-orange);
+	color: #1f1305;
+	font-weight: 700;
+	z-index: 1000;
+}
+
+.skip-link:focus {
+	top: var(--space-2);
+}
+
+.site-header {
+	position: sticky;
+	top: 0;
+	z-index: 50;
+	background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+	backdrop-filter: blur(10px);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.site-header-inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	padding: var(--space-2) 0;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.brand-mark {
+	inline-size: 16px;
+	block-size: 16px;
+	border-radius: 999px;
+	background: linear-gradient(
+		135deg,
+		var(--color-accent-orange),
+		var(--color-accent-teal)
+	);
+}
+
+.desktop-nav ul,
+.mobile-nav ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.desktop-nav ul {
+	display: flex;
+	gap: var(--space-2);
+}
+
+.desktop-nav a,
+.mobile-nav a {
+	text-decoration: none;
+	padding: 6px 10px;
+	border-radius: 10px;
+}
+
+.desktop-nav a:hover,
+.desktop-nav a:focus-visible,
+.mobile-nav a:hover,
+.mobile-nav a:focus-visible {
+	background: color-mix(in srgb, var(--color-accent-teal) 16%, transparent);
+	outline: none;
+}
+
+.mobile-nav {
+	display: none;
+}
+
+.mobile-nav details {
+	position: relative;
+}
+
+.mobile-nav summary {
+	cursor: pointer;
+	padding: 8px 12px;
+	border-radius: 10px;
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	font-weight: 600;
+}
+
+.mobile-nav details[open] summary {
+	margin-bottom: var(--space-1);
+}
+
+.mobile-nav ul {
+	display: grid;
+	gap: var(--space-1);
+	padding: var(--space-1);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	background: var(--color-surface);
+	box-shadow: var(--shadow-soft);
+}
+
+main {
+	padding-block: var(--space-4) var(--space-5);
+}
+
+.site-footer {
+	border-top: 1px solid var(--color-border);
+	padding: var(--space-3) 0 var(--space-4);
+	font-size: var(--text-1);
+	color: var(--color-muted);
+}
+
+.site-footer a {
+	color: var(--color-accent-teal);
+}
+
+@media (max-width: 880px) {
+	.desktop-nav {
+		display: none;
+	}
+
+	.mobile-nav {
+		display: block;
+	}
+}

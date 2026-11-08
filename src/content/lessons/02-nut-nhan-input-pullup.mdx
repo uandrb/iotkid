@@ -1,0 +1,112 @@
+---
+title: "Bài 2: Nút nhấn bật đèn với INPUT_PULLUP"
+slug: "nut-nhan-bat-den"
+order: 2
+level: "Dễ"
+durationMinutes: 40
+board: "esp32"
+modules:
+  - breadboard-mini
+  - day-jumper
+  - led-dien-tro-220
+  - nut-nhan
+goals:
+  - Hiểu cách đọc nút nhấn với INPUT_PULLUP.
+  - Biết tín hiệu nút nhấn thường đảo mức (nhấn = LOW).
+  - Điều khiển LED theo trạng thái nút nhấn.
+labPreset: "preset-nut-nhan"
+draft: false
+---
+
+<MucTieu items={frontmatter.goals} />
+
+<CanChuanBi moduleIds={frontmatter.modules} />
+
+## Sơ đồ nối dây
+
+<SoDoNoiDay
+  connections={[
+    { tu: "GPIO4", den: "Một chân nút nhấn" },
+    { tu: "GND", den: "Chân nút nhấn còn lại" },
+    { tu: "GPIO2", den: "LED (+) qua điện trở 220Ω" },
+    { tu: "GND", den: "LED (-)" }
+  ]}
+/>
+
+<CanhBao loai="meo">
+  Dùng `INPUT_PULLUP` để bật điện trở kéo lên bên trong ESP32, nên em không cần thêm điện trở kéo ngoài cho nút nhấn cơ bản.
+</CanhBao>
+
+## Code
+
+<Code
+  language="cpp"
+  code={`const int BUTTON_PIN = 4;
+const int LED_PIN = 2;
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  int buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState == LOW) {
+    digitalWrite(LED_PIN, HIGH);
+  } else {
+    digitalWrite(LED_PIN, LOW);
+  }
+}`}
+/>
+
+<GiaiThichDong
+  items={[
+    { dong: 1, y: "Chọn GPIO4 để đọc nút nhấn." },
+    { dong: 5, y: "Bật INPUT_PULLUP: bình thường đọc HIGH, nhấn sẽ về LOW." },
+    { dong: 10, y: "Đọc trạng thái nút mỗi vòng lặp." },
+    { dong: 11, y: "Nếu LOW nghĩa là đang nhấn, bật LED." },
+    { dong: 13, y: "Nếu không nhấn, tắt LED." }
+  ]}
+/>
+
+<ThuThach hint="Thử đảo lại điều kiện để đèn sáng khi không nhấn và tắt khi nhấn.">
+  Viết lại để LED đổi trạng thái mỗi lần em nhấn nút một lần.
+</ThuThach>
+
+## Lỗi hay gặp
+
+<CanhBao loai="loi-hay-gap">
+  Nút nhấn không đúng có thể bị cắm lệch chân, khiến mạch luôn đọc một trạng thái.
+</CanhBao>
+
+## Quiz 3 câu
+
+<Quiz
+  lessonSlug={frontmatter.slug}
+  quizId="quiz-bai-2"
+  questions={[
+    {
+      id: "q1",
+      question: "Với INPUT_PULLUP, khi chưa nhấn nút thì thường đọc gì?",
+      options: ["LOW", "HIGH", "Ngẫu nhiên"],
+      answerIndex: 1,
+      explanation: "INPUT_PULLUP kéo mức chân lên HIGH khi chưa nhấn."
+    },
+    {
+      id: "q2",
+      question: "Khi nhấn nút (nối xuống GND), tín hiệu thường là?",
+      options: ["LOW", "HIGH", "3.3V cố định"],
+      answerIndex: 0,
+      explanation: "Nhấn nút tạo đường về GND nên chân đọc LOW."
+    },
+    {
+      id: "q3",
+      question: "GPIO34-39 trên ESP32 DevKit V1 dùng cho mục đích nào?",
+      options: ["Chỉ đọc tín hiệu", "Chỉ xuất PWM", "Chạy Wi-Fi"],
+      answerIndex: 0,
+      explanation: "GPIO34-39 là các chân input-only, không xuất digital/PWM."
+    }
+  ]}
+/>
+
+<MoTrongLab preset={frontmatter.labPreset} />

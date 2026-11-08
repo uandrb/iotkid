@@ -1,0 +1,12 @@
+{
+  "id": "q2",
+  "question": "Vì sao LED rời thường cần điện trở 220Ω?",
+  "options": [
+    { "text": "Để tăng điện áp", "correct": false },
+    { "text": "Để hạn dòng bảo vệ LED và GPIO", "correct": true },
+    { "text": "Để bật Wi-Fi", "correct": false },
+    { "text": "Để đổi chân analog", "correct": false }
+  ],
+  "explanation": "Điện trở giúp hạn dòng, tránh hỏng LED và chân xuất.",
+  "lessonLink": "/bai-hoc/nhay-led"
+}

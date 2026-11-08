@@ -1,0 +1,12 @@
+{
+  "id": "q6",
+  "question": "Khi bật Wi-Fi, nhóm ADC nào trên ESP32 dễ bị xung đột?",
+  "options": [
+    { "text": "ADC1", "correct": false },
+    { "text": "ADC2", "correct": true },
+    { "text": "Cả hai như nhau", "correct": false },
+    { "text": "Không nhóm nào", "correct": false }
+  ],
+  "explanation": "ADC2 có thể không đọc ổn định khi Wi-Fi đang hoạt động.",
+  "lessonLink": "/bai-hoc/bien-tro-chinh-do-sang"
+}

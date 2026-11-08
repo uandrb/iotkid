@@ -1,0 +1,12 @@
+{
+  "id": "q5",
+  "question": "Khoảng giá trị analogRead mặc định trên ESP32 thường là:",
+  "options": [
+    { "text": "0..255", "correct": false },
+    { "text": "0..1023", "correct": false },
+    { "text": "0..4095", "correct": true },
+    { "text": "-1..1", "correct": false }
+  ],
+  "explanation": "ESP32 thường dùng ADC 12-bit, tương ứng 0..4095.",
+  "lessonLink": "/bai-hoc/bien-tro-chinh-do-sang"
+}

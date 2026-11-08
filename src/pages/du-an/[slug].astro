@@ -1,0 +1,230 @@
+---
+import { render } from 'astro:content';
+import MainLayout from '../../layouts/MainLayout.astro';
+import { moduleMap } from '../../lib/catalog';
+import { parseVietnamesePriceRange, formatVnd } from '../../lib/pricing';
+import { getProjects } from '../../lib/projects';
+
+export async function getStaticPaths() {
+	const projects = await getProjects();
+	return projects.map((project) => ({
+		params: { slug: project.data.slug },
+		props: { project }
+	}));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+
+const shoppingRows = project.data.danhSachMua.map((item: { id: string; soLuong: number }) => {
+	const moduleItem = moduleMap.get(item.id);
+	const price = moduleItem ? parseVietnamesePriceRange(moduleItem.giaThamKhao) : null;
+	return {
+		id: item.id,
+		soLuong: item.soLuong,
+		name: moduleItem?.ten ?? item.id,
+		keyword: moduleItem?.tuKhoaTimMua ?? 'TODO: kiểm tra',
+		priceText: moduleItem?.giaThamKhao ?? 'TODO: kiểm tra',
+		price
+	};
+});
+
+const totalMin = shoppingRows.reduce((sum, row) => sum + (row.price?.min ?? 0) * row.soLuong, 0);
+const totalMax = shoppingRows.reduce((sum, row) => sum + (row.price?.max ?? 0) * row.soLuong, 0);
+---
+
+<MainLayout title={`${project.data.title} | Dự án | Xưởng IoT`}>
+	<article class="project-page" data-project-slug={project.data.slug} data-lab-preset={project.data.labPreset}>
+		<img src={project.data.anhBia} alt={project.data.title} class="cover" width="480" height="260" />
+		<h1>{project.data.title}</h1>
+		<p class="meta">
+			{project.data.level} · {project.data.board.toUpperCase()} · {project.data.thoiGian}
+		</p>
+
+		<Content />
+
+		<section>
+			<h2>Danh sách cần mua</h2>
+			<div class="table-wrap">
+				<table>
+					<thead>
+						<tr>
+							<th>Linh kiện</th>
+							<th>Số lượng</th>
+							<th>Giá tham khảo</th>
+							<th>Từ khóa tìm mua</th>
+						</tr>
+					</thead>
+					<tbody>
+						{
+							shoppingRows.map((row) => (
+								<tr>
+									<td>{row.name}</td>
+									<td>{row.soLuong}</td>
+									<td>{row.priceText}</td>
+									<td>{row.keyword}</td>
+								</tr>
+							))
+						}
+					</tbody>
+				</table>
+			</div>
+			<p>
+				Tổng chi phí tham khảo: <strong>{formatVnd(totalMin)}–{formatVnd(totalMax)} VNĐ</strong>
+			</p>
+		</section>
+
+		<section>
+			<h2>Các bước ráp</h2>
+			<ol class="steps">
+				{
+					Array.from({ length: project.data.steps }).map((_, index) => (
+						<li>
+							<label>
+								<input type="checkbox" data-step-index={index} />
+								<span>Bước {index + 1}</span>
+							</label>
+						</li>
+					))
+				}
+			</ol>
+			<button type="button" class="btn-complete" id="btn-complete-project">
+				Đánh dấu hoàn thành dự án
+			</button>
+			<p id="project-status"></p>
+		</section>
+
+		<p>
+			<a class="lab-link" href={`/phong-lab?preset=${project.data.labPreset}`}>Ráp thử trong Phòng Lab</a>
+		</p>
+
+		<section>
+			<h2>Khi làm thật</h2>
+			<ul>
+				<li>Ưu tiên nguồn điện thấp áp, kiểm tra cực nguồn trước khi cấp điện.</li>
+				<li>Hàn mạch ở nơi thoáng, có người hướng dẫn và dụng cụ bảo hộ phù hợp.</li>
+				<li>Dùng vỏ hộp để bảo vệ mạch, tránh chạm chập hoặc đứt dây khi di chuyển.</li>
+			</ul>
+		</section>
+	</article>
+</MainLayout>
+
+<script>
+	import { getLabWireStatus, getProjectProgress, saveProjectProgress } from '../../lib/progress';
+
+	const root = document.querySelector('.project-page');
+	const slug = root?.dataset.projectSlug ?? '';
+	const labPreset = root?.dataset.labPreset ?? '';
+	const statusNode = document.getElementById('project-status');
+	const completeButton = document.getElementById('btn-complete-project');
+	const checkboxes = Array.from(document.querySelectorAll('input[data-step-index]'));
+
+	if (slug) {
+		const saved = getProjectProgress(slug);
+		if (saved) {
+			checkboxes.forEach((checkbox, index) => {
+				checkbox.checked = Boolean(saved.checklist[index]);
+			});
+			if (saved.done && statusNode) {
+				statusNode.textContent = 'Em đã hoàn thành dự án này.';
+			}
+		}
+	}
+
+	const persistChecklist = () => {
+		if (!slug) return;
+		const list = checkboxes.map((checkbox) => checkbox.checked);
+		saveProjectProgress(slug, {
+			done: list.every(Boolean),
+			checklist: list,
+			noWireError: !getLabWireStatus(labPreset).hasWireError
+		});
+	};
+
+	checkboxes.forEach((checkbox) => {
+		checkbox.addEventListener('change', persistChecklist);
+	});
+
+	completeButton?.addEventListener('click', () => {
+		if (!slug) return;
+		const checklist = checkboxes.map((checkbox) => checkbox.checked);
+		const done = checklist.every(Boolean);
+		if (!done) {
+			if (statusNode) statusNode.textContent = 'Em cần tick đủ các bước trước khi hoàn thành.';
+			return;
+		}
+		saveProjectProgress(slug, {
+			done: true,
+			checklist,
+			noWireError: !getLabWireStatus(labPreset).hasWireError
+		});
+		if (statusNode) statusNode.textContent = 'Tuyệt! Dự án đã được đánh dấu hoàn thành.';
+	});
+</script>
+
+<style>
+	.project-page {
+		max-width: 78ch;
+	}
+
+	.cover {
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+	}
+
+	.meta {
+		color: var(--color-muted);
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		min-width: 680px;
+		border-collapse: collapse;
+		border: 1px solid var(--color-border);
+	}
+
+	th,
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--color-border);
+		text-align: left;
+	}
+
+	.steps {
+		display: grid;
+		gap: var(--space-1);
+	}
+
+	label {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.btn-complete,
+	.lab-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 44px;
+		padding: 10px 14px;
+		border-radius: var(--radius-sm);
+		font-weight: 700;
+	}
+
+	.btn-complete {
+		border: none;
+		background: var(--color-accent-orange);
+		color: #351b00;
+		cursor: pointer;
+	}
+
+	.lab-link {
+		background: var(--color-accent-teal);
+		color: #032522;
+		text-decoration: none;
+	}
+</style>

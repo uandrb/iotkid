@@ -1,0 +1,268 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout>
+	<section class="hero">
+		<div>
+			<p class="eyebrow">[TÊN WEBSITE]</p>
+			<h1>Xưởng IoT</h1>
+			<p class="tagline">Tự tay làm đồ vật thông minh</p>
+			<p class="intro">
+				Bắt đầu học IoT với ESP32 theo cách dễ hiểu, vui, và an toàn. Em có thể học trước bằng
+				mạch ảo rồi mới làm thật.
+			</p>
+			<div class="hero-cta">
+				<a class="btn btn-primary" href="/bai-hoc/nhay-led">Em mới bắt đầu</a>
+				<a class="btn btn-secondary" href="/du-an">Em muốn làm dự án</a>
+			</div>
+		</div>
+		<svg class="hero-board" viewBox="0 0 360 240" role="img" aria-label="Minh họa board ESP32">
+			<rect x="30" y="30" width="300" height="180" rx="22" class="board" />
+			<rect x="65" y="78" width="138" height="90" rx="10" class="chip" />
+			<rect x="222" y="78" width="68" height="22" rx="8" class="module" />
+			<rect x="222" y="112" width="68" height="22" rx="8" class="module" />
+			<circle cx="271" cy="168" r="12" class="led" />
+			<line x1="215" y1="168" x2="250" y2="168" class="trace" />
+			<g class="pins">
+				{
+					Array.from({ length: 10 }).map((_, index) => (
+						<rect x={44 + index * 28} y="46" width="16" height="12" rx="4" />
+					))
+				}
+				{
+					Array.from({ length: 10 }).map((_, index) => (
+						<rect x={44 + index * 28} y="182" width="16" height="12" rx="4" />
+					))
+				}
+			</g>
+		</svg>
+	</section>
+
+	<section aria-labelledby="iot-la-gi" class="section">
+		<h2 id="iot-la-gi">IoT là gì?</h2>
+		<div class="card-grid">
+			<article class="card">
+				<h3>Cây tự tưới</h3>
+				<p>Cảm biến đo độ ẩm đất. Khi đất khô, hệ thống tự bật bơm để tưới.</p>
+			</article>
+			<article class="card">
+				<h3>Đèn báo phòng học</h3>
+				<p>Đèn đổi trạng thái theo lịch hoặc theo cảm biến. Em nhìn là biết phòng đang dùng hay trống.</p>
+			</article>
+			<article class="card">
+				<h3>Trạm thời tiết sân trường</h3>
+				<p>Thiết bị đo nhiệt độ, độ ẩm, lượng mưa và hiển thị số liệu để theo dõi mỗi ngày.</p>
+			</article>
+		</div>
+	</section>
+
+	<section aria-labelledby="cach-hoc" class="section">
+		<h2 id="cach-hoc">Cách học ở đây</h2>
+		<ol class="steps">
+			<li><strong>Đọc bài</strong> để hiểu mục tiêu và nguyên lý.</li>
+			<li><strong>Ráp mạch ảo</strong> trong phòng lab để thử an toàn.</li>
+			<li><strong>Chạy code</strong> và nhận gợi ý sửa lỗi ngay.</li>
+			<li><strong>Làm thật</strong> khi em đã sẵn sàng với linh kiện thật.</li>
+		</ol>
+	</section>
+</MainLayout>
+
+<style>
+	.hero {
+		display: grid;
+		grid-template-columns: 1.1fr 1fr;
+		gap: var(--space-3);
+		align-items: center;
+	}
+
+	.eyebrow {
+		display: inline-block;
+		margin: 0;
+		padding: 4px 10px;
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-accent-teal) 14%, transparent);
+		font-weight: 600;
+		font-size: var(--text-1);
+	}
+
+	h1 {
+		margin: var(--space-2) 0 var(--space-1);
+		font-size: clamp(2rem, 5vw, 3rem);
+		line-height: 1.1;
+	}
+
+	.tagline {
+		margin: 0;
+		font-size: var(--text-3);
+		color: var(--color-accent-teal);
+		font-weight: 700;
+	}
+
+	.intro {
+		max-width: 56ch;
+		color: var(--color-muted);
+	}
+
+	.hero-cta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 44px;
+		padding: 10px 18px;
+		border-radius: var(--radius-sm);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.btn-primary {
+		background: var(--color-accent-orange);
+		color: #251200;
+	}
+
+	.btn-secondary {
+		background: color-mix(in srgb, var(--color-accent-teal) 15%, var(--color-surface));
+		border: 1px solid var(--color-border);
+	}
+
+	.hero-board {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-soft);
+		padding: var(--space-1);
+	}
+
+	.board {
+		fill: #1e4b6c;
+	}
+
+	.chip {
+		fill: #123247;
+	}
+
+	.module {
+		fill: #2d698f;
+	}
+
+	.led {
+		fill: #ffe082;
+		filter: drop-shadow(0 0 8px rgb(255 224 130 / 85%));
+		animation: blink 1.2s steps(2, end) infinite;
+	}
+
+	.trace {
+		stroke: #89d4ff;
+		stroke-width: 4;
+		stroke-linecap: round;
+	}
+
+	.pins rect {
+		fill: #9cc6e2;
+	}
+
+	.section {
+		margin-top: var(--space-5);
+	}
+
+	h2 {
+		font-size: var(--text-4);
+	}
+
+	.card-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-2);
+	}
+
+	.card {
+		padding: var(--space-2);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-soft);
+	}
+
+	.card h3 {
+		margin-top: 0;
+		font-size: var(--text-3);
+	}
+
+	.card p {
+		margin-bottom: 0;
+		color: var(--color-muted);
+	}
+
+	.steps {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: var(--space-2);
+		padding: 0;
+		list-style: none;
+		counter-reset: step;
+	}
+
+	.steps li {
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		box-shadow: var(--shadow-soft);
+	}
+
+	.steps li::before {
+		counter-increment: step;
+		content: 'Bước ' counter(step);
+		display: block;
+		margin-bottom: var(--space-1);
+		font-size: var(--text-1);
+		font-weight: 700;
+		color: var(--color-accent-orange);
+	}
+
+	@keyframes blink {
+		0%,
+		48% {
+			opacity: 1;
+		}
+
+		50%,
+		100% {
+			opacity: 0.4;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.led {
+			animation: none;
+		}
+	}
+
+	@media (max-width: 960px) {
+		.hero {
+			grid-template-columns: 1fr;
+		}
+
+		.card-grid {
+			grid-template-columns: 1fr 1fr;
+		}
+
+		.steps {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	@media (max-width: 600px) {
+		.card-grid,
+		.steps {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

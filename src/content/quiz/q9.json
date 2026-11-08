@@ -1,0 +1,12 @@
+{
+  "id": "q9",
+  "question": "Với relay trong dự án học sinh, điều nào đúng?",
+  "options": [
+    { "text": "Tự đấu 220V để thử nhanh", "correct": false },
+    { "text": "Luôn ưu tiên tải điện áp thấp, có giám sát", "correct": true },
+    { "text": "Nối trực tiếp tải vào GPIO", "correct": false },
+    { "text": "Không cần nguồn riêng", "correct": false }
+  ],
+  "explanation": "Dự án học sinh nên dùng tải thấp áp, không tự đấu điện lưới.",
+  "lessonLink": "/du-an/cay-tu-tuoi"
+}

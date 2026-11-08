@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" role="img" aria-label="Cây tự tưới">
+  <rect width="480" height="260" rx="24" fill="#ecfccb"/>
+  <rect x="70" y="150" width="160" height="70" rx="12" fill="#92400e"/>
+  <circle cx="150" cy="115" r="42" fill="#22c55e"/>
+  <rect x="280" y="90" width="110" height="80" rx="10" fill="#0ea5e9"/>
+  <path d="M390 130 C430 130, 430 180, 390 180" fill="none" stroke="#0284c7" stroke-width="8"/>
+</svg>

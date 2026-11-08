@@ -1,0 +1,510 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import { BADGES, badgeSvg } from '../lib/badges';
+---
+
+<MainLayout title="Tiến độ của em | Xưởng IoT">
+	<section class="intro">
+		<h1>Tiến độ của em</h1>
+		<p>
+			Dữ liệu chỉ nằm trên máy này; xóa lịch sử trình duyệt sẽ mất, nên xuất file định kỳ.
+		</p>
+		<p id="storage-warning" class="warning" hidden></p>
+	</section>
+
+	<section class="profile">
+		<label for="display-name">Tên hiển thị của em (chỉ lưu trên máy này)</label>
+		<input id="display-name" type="text" placeholder="Ví dụ: Minh, An, lớp 8A..." />
+	</section>
+
+	<section class="summary" id="summary">
+		<article>
+			<h2>Bài học đã xong</h2>
+			<p data-summary-lessons>0</p>
+		</article>
+		<article>
+			<h2>Huy hiệu</h2>
+			<p data-summary-badges>0</p>
+		</article>
+		<article>
+			<h2>Bài làm đã lưu</h2>
+			<p data-summary-works>0</p>
+		</article>
+	</section>
+
+	<section>
+		<h2>Huy hiệu của em</h2>
+		<div class="badge-grid" id="badge-grid">
+			{
+				BADGES.map((badge) => (
+					<article class="badge-card" data-badge-id={badge.id}>
+						<div class="badge-icon" set:html={badgeSvg(badge.id)}></div>
+						<h3>{badge.title}</h3>
+						<p>{badge.description}</p>
+						<p class="state" data-state>Chưa mở khóa</p>
+					</article>
+				))
+			}
+		</div>
+	</section>
+
+	<section>
+		<h2>Bài làm Phòng Lab đã lưu</h2>
+		<ul id="works-list" class="works-list"></ul>
+		<p id="works-empty">Chưa có bài làm nào được lưu.</p>
+	</section>
+
+	<section class="io">
+		<h2>Xuất / Nhập dữ liệu</h2>
+		<div class="io-row">
+			<button type="button" id="btn-export-backup">Xuất toàn bộ tiến độ</button>
+		</div>
+		<div class="dropzone" id="dropzone">
+			<p>Kéo thả file .xuongiot.json hoặc .xuongiot-backup.json vào đây</p>
+			<p>hoặc</p>
+			<label class="pick-file">
+				<span>Chọn file để nhập</span>
+				<input id="import-file" type="file" accept=".json,.xuongiot.json,.xuongiot-backup.json" />
+			</label>
+		</div>
+		<p id="import-message" aria-live="polite"></p>
+		<div id="import-choice" class="import-choice" hidden>
+			<p>Em muốn nhập bản sao lưu theo cách nào?</p>
+			<div>
+				<button type="button" id="btn-import-merge">Gộp</button>
+				<button type="button" id="btn-import-replace">Thay thế</button>
+			</div>
+		</div>
+	</section>
+</MainLayout>
+
+<script>
+	import { evaluateUnlockedBadges } from '../lib/badges';
+	import {
+		getAllLessonStatuses,
+		getAllProjectProgress,
+		getCatalogViewsCount,
+		getDisplayName,
+		getStorageWarningMessage,
+		setDisplayName,
+		setUnlockedBadges
+	} from '../lib/progress';
+	import {
+		deleteLabWork,
+		downloadTextFile,
+		exportBackup,
+		exportLabWork,
+		importFromJson,
+		listLabWorks,
+		renameLabWork
+	} from '../lib/storage';
+
+	const statusWarning = document.getElementById('storage-warning');
+	const displayNameInput = document.getElementById('display-name');
+	const summaryLessons = document.querySelector('[data-summary-lessons]');
+	const summaryBadges = document.querySelector('[data-summary-badges]');
+	const summaryWorks = document.querySelector('[data-summary-works]');
+	const worksList = document.getElementById('works-list');
+	const worksEmpty = document.getElementById('works-empty');
+	const importFileInput = document.getElementById('import-file');
+	const importMessage = document.getElementById('import-message');
+	const importChoice = document.getElementById('import-choice');
+	const btnImportMerge = document.getElementById('btn-import-merge');
+	const btnImportReplace = document.getElementById('btn-import-replace');
+	const dropzone = document.getElementById('dropzone');
+	const btnExportBackup = document.getElementById('btn-export-backup');
+
+	let pendingRaw = null;
+
+	const warningText = getStorageWarningMessage();
+	if (warningText && statusWarning) {
+		statusWarning.hidden = false;
+		statusWarning.textContent = warningText;
+	}
+
+	if (displayNameInput) {
+		displayNameInput.value = getDisplayName();
+		displayNameInput.addEventListener('input', (event) => {
+			const nextName = event.target.value ?? '';
+			const ok = setDisplayName(nextName);
+			if (!ok && importMessage) {
+				importMessage.textContent = 'Không thể lưu tên trên máy này. Em vẫn có thể dùng Xuất file.';
+			}
+		});
+	}
+
+	function recalcBadges() {
+		const lessons = getAllLessonStatuses();
+		const projects = getAllProjectProgress();
+		const completedLessons = Object.values(lessons).filter((status) => status === 'da-xong').length;
+		const completedProjects = Object.values(projects).filter((project) => project.done).length;
+		const firstLightDone = lessons['nhay-led'] === 'da-xong';
+		const projectWithoutWireErrorDone = Object.values(projects).some(
+			(project) => project.done && project.noWireError
+		);
+		const catalogViews = getCatalogViewsCount();
+		return evaluateUnlockedBadges({
+			completedLessons,
+			completedProjects,
+			catalogViews,
+			firstLightDone,
+			projectWithoutWireErrorDone
+		});
+	}
+
+	function renderWorks() {
+		if (!worksList || !worksEmpty) return;
+		const items = listLabWorks();
+		worksList.innerHTML = '';
+		worksEmpty.hidden = items.length > 0;
+		items.forEach((work) => {
+			const li = document.createElement('li');
+			li.className = 'work-item';
+			li.innerHTML = `
+				<div>
+					<p class="work-name">${work.name}</p>
+					<p class="work-meta">${work.boardId.toUpperCase()} · Cập nhật ${new Date(work.updatedAt).toLocaleString('vi-VN')}</p>
+				</div>
+				<div class="work-actions">
+					<button type="button" data-action="open" data-id="${work.id}">Mở</button>
+					<button type="button" data-action="rename" data-id="${work.id}">Đổi tên</button>
+					<button type="button" data-action="export" data-id="${work.id}">Xuất file</button>
+					<button type="button" data-action="delete" data-id="${work.id}">Xóa</button>
+				</div>
+			`;
+			worksList.appendChild(li);
+		});
+	}
+
+	function render() {
+		const lessons = getAllLessonStatuses();
+		const completedLessons = Object.values(lessons).filter((status) => status === 'da-xong').length;
+		const unlocked = recalcBadges();
+		setUnlockedBadges(unlocked);
+		const works = listLabWorks();
+
+		if (summaryLessons) summaryLessons.textContent = String(completedLessons);
+		if (summaryBadges) summaryBadges.textContent = String(unlocked.length);
+		if (summaryWorks) summaryWorks.textContent = String(works.length);
+
+		document.querySelectorAll('.badge-card').forEach((card) => {
+			const id = card.dataset.badgeId ?? '';
+			const stateNode = card.querySelector('[data-state]');
+			if (!stateNode) return;
+			if (unlocked.includes(id)) {
+				card.classList.add('open');
+				stateNode.textContent = 'Đã mở khóa';
+			} else {
+				card.classList.remove('open');
+				stateNode.textContent = 'Chưa mở khóa';
+			}
+		});
+
+		renderWorks();
+	}
+
+	async function readSelectedFile(file) {
+		if (!file || !importMessage) return;
+		if (file.size > 1_000_000) {
+			importMessage.textContent = 'File lớn hơn 1 MB, em hãy chọn file nhỏ hơn.';
+			return;
+		}
+		const raw = await file.text();
+		try {
+			const parsed = JSON.parse(raw);
+			if (parsed?.type === 'xuong-iot-backup') {
+				pendingRaw = raw;
+				importChoice.hidden = false;
+				importMessage.textContent = 'Đã đọc file backup. Hãy chọn Gộp hoặc Thay thế.';
+				return;
+			}
+		} catch {
+			// Let importFromJson report a friendly error.
+		}
+
+		const result = importFromJson(raw, 'merge');
+		importMessage.textContent = result.ok
+			? 'Đã nhập bài làm thành công.'
+			: result.message ?? 'Không thể nhập file.';
+		importChoice.hidden = true;
+		pendingRaw = null;
+		render();
+	}
+
+	worksList?.addEventListener('click', (event) => {
+		const button = event.target.closest('button');
+		if (!button) return;
+		const action = button.dataset.action ?? '';
+		const workId = button.dataset.id ?? '';
+		if (!workId) return;
+		if (action === 'open') {
+			window.location.href = `/phong-lab?work=${workId}`;
+			return;
+		}
+		if (action === 'rename') {
+			const nextName = window.prompt('Đặt tên mới cho bài làm này:');
+			if (!nextName) return;
+			const result = renameLabWork(workId, nextName);
+			if (!result.ok && importMessage) {
+				importMessage.textContent = result.message ?? 'Không thể đổi tên bài làm.';
+			}
+			render();
+			return;
+		}
+		if (action === 'export') {
+			const result = exportLabWork(workId);
+			if (!result.ok || !result.value) {
+				if (importMessage) importMessage.textContent = result.message ?? 'Không thể xuất bài làm.';
+				return;
+			}
+			downloadTextFile(`${workId}.xuongiot.json`, result.value);
+			if (importMessage) importMessage.textContent = 'Đã xuất bài làm.';
+			return;
+		}
+		if (action === 'delete') {
+			const confirmed = window.confirm('Em có chắc muốn xóa bài làm này?');
+			if (!confirmed) return;
+			const result = deleteLabWork(workId);
+			if (!result.ok && importMessage) {
+				importMessage.textContent = result.message ?? 'Không thể xóa bài làm.';
+			}
+			render();
+		}
+	});
+
+	btnExportBackup?.addEventListener('click', () => {
+		downloadTextFile('xuongiot-backup.xuongiot-backup.json', exportBackup());
+		if (importMessage) importMessage.textContent = 'Đã xuất toàn bộ tiến độ.';
+	});
+
+	importFileInput?.addEventListener('change', async () => {
+		const file = importFileInput.files?.[0];
+		await readSelectedFile(file);
+		importFileInput.value = '';
+	});
+
+	['dragenter', 'dragover'].forEach((eventName) => {
+		dropzone?.addEventListener(eventName, (event) => {
+			event.preventDefault();
+			dropzone.classList.add('dragging');
+		});
+	});
+
+	['dragleave', 'drop'].forEach((eventName) => {
+		dropzone?.addEventListener(eventName, (event) => {
+			event.preventDefault();
+			dropzone.classList.remove('dragging');
+		});
+	});
+
+	dropzone?.addEventListener('drop', async (event) => {
+		const file = event.dataTransfer?.files?.[0];
+		await readSelectedFile(file);
+	});
+
+	btnImportMerge?.addEventListener('click', () => {
+		if (!pendingRaw || !importMessage) return;
+		const result = importFromJson(pendingRaw, 'merge');
+		importMessage.textContent = result.ok ? 'Đã gộp dữ liệu thành công.' : result.message ?? 'Không thể gộp dữ liệu.';
+		pendingRaw = null;
+		importChoice.hidden = true;
+		render();
+	});
+
+	btnImportReplace?.addEventListener('click', () => {
+		if (!pendingRaw || !importMessage) return;
+		const result = importFromJson(pendingRaw, 'replace');
+		importMessage.textContent = result.ok
+			? 'Đã thay thế dữ liệu thành công.'
+			: result.message ?? 'Không thể thay thế dữ liệu.';
+		pendingRaw = null;
+		importChoice.hidden = true;
+		render();
+	});
+
+	render();
+</script>
+
+<style>
+	.warning {
+		color: var(--color-error);
+		font-weight: 600;
+	}
+
+	.profile {
+		margin-top: var(--space-2);
+		display: grid;
+		gap: 8px;
+	}
+
+	.profile input {
+		min-height: 44px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		padding: 10px 12px;
+		background: var(--color-surface);
+		color: var(--color-text);
+		max-width: 480px;
+	}
+
+	.summary {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: var(--space-2);
+		margin-block: var(--space-3);
+	}
+
+	.summary article {
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+	}
+
+	.summary p {
+		font-size: var(--text-4);
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.badge-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.badge-card {
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		opacity: 0.7;
+	}
+
+	.badge-card.open {
+		opacity: 1;
+		animation: pop 700ms ease-out;
+	}
+
+	.badge-icon {
+		width: 120px;
+	}
+
+	.state {
+		font-weight: 700;
+		color: var(--color-muted);
+	}
+
+	.badge-card.open .state {
+		color: var(--color-success);
+	}
+
+	.works-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: var(--space-1);
+	}
+
+	.work-item {
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+	}
+
+	.work-name {
+		margin: 0;
+		font-weight: 700;
+	}
+
+	.work-meta {
+		margin: 6px 0 0;
+		color: var(--color-muted);
+		font-size: var(--text-1);
+	}
+
+	.work-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.work-actions button,
+	.io-row button,
+	.pick-file {
+		min-height: 44px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		padding: 8px 12px;
+		background: var(--color-surface);
+		color: inherit;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+	.io {
+		margin-top: var(--space-3);
+	}
+
+	.dropzone {
+		margin-top: var(--space-2);
+		padding: var(--space-2);
+		border: 2px dashed var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+		text-align: center;
+	}
+
+	.dropzone.dragging {
+		border-color: var(--color-accent-teal);
+		background: color-mix(in srgb, var(--color-accent-teal) 10%, transparent);
+	}
+
+	.pick-file {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		text-decoration: none;
+	}
+
+	.pick-file input {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		opacity: 0;
+	}
+
+	.import-choice {
+		margin-top: var(--space-2);
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-sm);
+		background: var(--color-surface);
+	}
+
+	.import-choice div {
+		display: flex;
+		gap: 8px;
+	}
+
+	@keyframes pop {
+		0% {
+			transform: scale(0.94);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.badge-card.open {
+			animation: none;
+		}
+	}
+</style>

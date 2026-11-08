@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phòng Lab ESP32 mô phỏng</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#f3efe6; --panel:#fffdf8; --ink:#1c2433; --muted:#5b6475; --line:#e3ddcf;
+  --teal:#0f766e; --teal-50:#e6f4f1; --orange:#c2410c; --orange-50:#fff1e6; --red:#b91c1c; --red-50:#fdecec;
+  --blue:#1d4ed8; --blue-50:#e8eefc; --green:#15803d; --green-50:#e7f6ec; --violet:#6d28d9;
+  --mono:'Roboto Mono',Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:'Be Vietnam Pro',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;overflow:hidden}
+button{font:inherit;cursor:pointer}
+header{height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#14213d;color:#f8f5ee}
+header .logo{font-weight:800;font-size:17px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+header .logo span{background:#f4a261;color:#14213d;border-radius:6px;padding:2px 7px;font-size:12px}
+#modeChip{font-size:12px;background:#24365e;border-radius:20px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+header .sp{flex:1}
+.hbtn{background:#24365e;color:#f8f5ee;border:0;border-radius:8px;padding:7px 11px;font-weight:600;font-size:13px;white-space:nowrap}
+.hbtn:hover{background:#2f4677}
+.hbtn.acc{background:#f4a261;color:#14213d}
+main{display:grid;grid-template-columns:minmax(330px,40%) 1fr;height:calc(100vh - 56px);gap:10px;padding:10px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ptitle{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);font-weight:700}
+.ptitle .sp{flex:1}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-weight:600;font-size:13px;color:var(--ink)}
+.btn:hover{border-color:#c9c0ad}
+.btn.run{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn.stop{background:#fff;color:var(--red);border-color:#f0c4c4}
+.btn.pri{background:var(--teal);color:#fff;border-color:var(--teal)}
+.btn.warn{background:var(--orange-50);color:var(--orange);border-color:#f6c9a8}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.editor{flex:1;display:flex;min-height:0;background:#1b2130;position:relative}
+#gutter{margin:0;padding:12px 8px 12px 10px;color:#5d6987;font:13px/1.55 var(--mono);text-align:right;user-select:none;overflow:hidden;min-width:42px;background:#171c29}
+#code{flex:1;border:0;outline:0;resize:none;background:transparent;color:#e6e9f2;font:13px/1.55 var(--mono);padding:12px;white-space:pre;overflow:auto;tab-size:2}
+.serial{height:190px;display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.stitle{display:flex;align-items:center;gap:8px;padding:6px 12px;font-weight:700;font-size:13px}
+.stitle .sp{flex:1}
+#runState{font-weight:600;font-size:12px;color:var(--muted)}
+#runState.on{color:var(--green)}
+#serialOut{flex:1;overflow:auto;background:#0f1420;color:#b8f5c6;font:12.5px/1.5 var(--mono);padding:8px 12px;white-space:pre-wrap;word-break:break-word}
+#serialOut .sys{color:#93b4ff}
+#serialOut .err{color:#ff9b9b}
+#serialOut .warn{color:#ffd28a}
+.rtabs{display:flex;gap:4px;padding:8px 10px 0;border-bottom:1px solid var(--line)}
+.rtabs button{border:0;background:transparent;padding:8px 12px;border-radius:9px 9px 0 0;font-weight:700;color:var(--muted)}
+.rtabs button.on{background:#f3efe6;color:var(--ink)}
+.rtabs .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#cbd5e1;margin-left:6px;vertical-align:middle}
+.rtabs .dot.on{background:#22c55e}
+#tab-circuit{flex:1;display:flex;flex-direction:column;min-height:0;overflow:auto}
+#tab-circuit>*{flex-shrink:0}
+#guide{margin:10px 10px 0;border-radius:12px;border:1px solid var(--line);background:#fff}
+.g-head{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.g-head .t{font-weight:800}
+.g-head .sp{flex:1}
+.prog{height:6px;border-radius:6px;background:#eee7d8;overflow:hidden;flex:1;max-width:220px}
+.prog i{display:block;height:100%;background:var(--teal);border-radius:6px;transition:width .3s}
+.g-body{padding:0 12px 12px}
+.step-now{background:var(--teal-50);border-radius:10px;padding:10px 12px}
+.step-now h4{margin:0 0 4px;font-size:15px}
+.step-now p{margin:0 0 6px;color:var(--muted)}
+.cl{list-style:none;margin:6px 0;padding:0}
+.cl li{padding:3px 0;display:flex;gap:8px;align-items:center}
+.cl .ok{color:var(--green);font-weight:800}
+.cl .no{color:#a8a29e;font-weight:800}
+.hint{margin-top:8px;padding:8px 10px;border-radius:8px;background:#fff8e1;border:1px solid #f3dd9b}
+.g-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.alerts{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.alert{border-radius:8px;padding:7px 10px;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.alert.err{background:var(--red-50);color:#7f1d1d}
+.alert.warn{background:var(--orange-50);color:#7c2d12}
+.alert.info{background:var(--blue-50);color:#1e3a8a}
+.alert b{white-space:nowrap}
+.allsteps{margin:8px 0 0;padding-left:20px}
+.allsteps li{margin:2px 0;color:var(--muted)}
+.allsteps li.done{color:var(--green)}
+.allsteps li.cur{color:var(--ink);font-weight:700}
+#canvasWrap{position:relative;margin:10px;border-radius:12px;border:1px solid var(--line);background:#fbf8f1;background-image:radial-gradient(#e2dccd 1px,transparent 1px);background-size:18px 18px;min-height:340px}
+#svg{display:block;width:100%;height:auto;touch-action:none;user-select:none}
+#tip{position:absolute;pointer-events:none;background:#14213d;color:#fff;font-size:12px;padding:6px 9px;border-radius:7px;max-width:260px;display:none;z-index:5;line-height:1.4}
+#statusBar{margin:0 10px;font-size:12.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.lg{display:inline-flex;align-items:center;gap:5px}
+.lg i{width:10px;height:10px;border-radius:50%;display:inline-block;border:1px solid #0002}
+#pinInfo{flex-basis:100%;color:var(--ink);min-height:18px}
+#controls{margin:10px;display:flex;flex-direction:column;gap:10px}
+.ctl{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.ctl h5{margin:0 0 8px;font-size:13px}
+.ctlrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0}
+.ctlrow input[type=range]{flex:1;min-width:140px;accent-color:var(--teal)}
+.pressbtn{background:#334155;color:#fff;border:0;border-radius:20px;padding:8px 16px;font-weight:700;touch-action:none}
+.pressbtn.on{background:var(--teal)}
+.chat{display:flex;flex-direction:column;gap:8px}
+#chatLog{max-height:240px;overflow:auto;display:flex;flex-direction:column;gap:6px;padding:4px}
+.bub{max-width:85%;padding:8px 11px;border-radius:12px;line-height:1.45}
+.bub.me{align-self:flex-end;background:var(--teal);color:#fff;border-bottom-right-radius:4px}
+.bub.bot{align-self:flex-start;background:#f1ece0;border-bottom-left-radius:4px}
+.bub.sys{align-self:center;background:transparent;color:var(--muted);font-size:12px;font-style:italic}
+#chatForm{display:flex;gap:6px}
+#chatIn{flex:1;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font:inherit}
+#chatIn:disabled{background:#f4f1ea}
+.listen{color:var(--teal);font-weight:700}
+#tab-xz{flex:1;overflow:auto;background:#f6f7fb}
+.xz-top{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border-bottom:1px solid #e5e7eb}
+.xz-logo{font-weight:800;font-size:17px;color:#111827}
+.xz-logo b{color:#2563eb}
+.xz-wrap{padding:16px;max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.xz-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px}
+.xz-card h3{margin:0 0 8px;font-size:15px}
+.xz-note{font-size:12.5px;color:#475569;background:#eef2ff;border-radius:10px;padding:9px 12px}
+.xz-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.xz-row label{min-width:110px;color:#475569;font-size:13px}
+.xz-in{border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;font:inherit;min-width:200px;flex:1}
+.codein{font:600 22px var(--mono);letter-spacing:6px;max-width:220px;text-align:center}
+.dev{display:flex;align-items:center;gap:12px;border:1px solid #e5e7eb;border-radius:10px;padding:10px 12px}
+.dev .st{font-size:12px;font-weight:700;padding:2px 8px;border-radius:12px}
+.st.on{background:#dcfce7;color:#166534}.st.off{background:#f1f5f9;color:#64748b}
+.xz-msg{font-size:13px;margin-top:6px}
+.xz-msg.err{color:var(--red)}.xz-msg.ok{color:var(--green)}
+#modal{position:fixed;inset:0;background:#0f172a8c;display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+#modal[hidden]{display:none}
+.mbox{background:var(--panel);border-radius:16px;width:min(960px,100%);max-height:92vh;overflow:auto;position:relative;padding:22px 24px}
+.mclose{position:absolute;top:10px;right:12px;border:0;background:#efe9dc;border-radius:50%;width:32px;height:32px;font-size:18px}
+.mbox h2{margin:0 0 4px;font-size:21px}
+.mbox .sub{color:var(--muted);margin:0 0 14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.card{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.card:hover{border-color:var(--teal);box-shadow:0 2px 0 var(--teal)}
+.card .ic{font-size:24px}
+.card b{font-size:14.5px}
+.card small{color:var(--muted);line-height:1.4}
+.card .tag{align-self:flex-start;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px;background:var(--teal-50);color:var(--teal)}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big2 .card{padding:18px}
+.big2 .card .ic{font-size:34px}
+.lib-tabs{display:flex;gap:6px;margin-bottom:12px}
+.lib-tabs button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-weight:700}
+.lib-tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.detail{display:grid;grid-template-columns:300px 1fr;gap:18px}
+.detail h3{margin:14px 0 6px;font-size:15px}
+.detail ul{margin:0;padding-left:18px}
+.detail li{margin:3px 0}
+table.pt{border-collapse:collapse;width:100%;font-size:13px}
+.pt th,.pt td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.pt th{background:#f3efe6}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;font-size:13px;font-weight:600}
+.chip:hover{border-color:var(--teal);color:var(--teal)}
+pre.sample{background:#1b2130;color:#e6e9f2;font:12px/1.5 var(--mono);padding:10px 12px;border-radius:10px;max-height:240px;overflow:auto}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.inp{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font:inherit;width:100%}
+textarea.inp{font:12px var(--mono);min-height:140px}
+.savelist{display:flex;flex-direction:column;gap:6px}
+.saveitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 12px}
+.saveitem .sp{flex:1}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:min(420px,calc(100vw - 32px))}
+.toast{background:#14213d;color:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 6px 20px #0003;font-size:13.5px;line-height:1.45;animation:tin .25s ease}
+.toast.ok{background:#14532d}.toast.err{background:#7f1d1d}.toast.warn{background:#7c2d12}.toast.info{background:#1e3a8a}
+@keyframes tin{from{transform:translateY(10px);opacity:0}}
+#mobTabs{display:none}
+@media (max-width:900px){
+  body{overflow:auto}
+  header{height:auto;flex-wrap:wrap;padding:8px 10px;gap:6px}
+  #modeChip{display:none}
+  main{display:block;height:auto;padding:8px}
+  .panel{height:auto}
+  #left{height:78vh;margin-bottom:8px}
+  #mobTabs{display:flex;gap:6px;padding:8px 8px 0}
+  #mobTabs button{flex:1}
+  body.m-code #right{display:none}
+  body.m-circ #left{display:none}
+  #canvasWrap{overflow:auto;min-height:0}
+  #svg{min-width:880px}
+  .detail{grid-template-columns:1fr}
+  .big2{grid-template-columns:1fr}
+}
+@keyframes pulse{0%{opacity:.9;r:20}100%{opacity:0;r:40}}
+.wave{animation:wv 1s ease-out infinite}
+@keyframes wv{from{opacity:.8}to{opacity:0}}
+</style>
+</head>
+<body class="m-circ">
+<header>
+  <div class="logo">⚡ Phòng Lab ESP32 <span>mô phỏng</span></div>
+  <div id="modeChip">Chưa chọn bài</div>
+  <div class="sp"></div>
+  <button class="hbtn" id="hLib">📘 Thư viện mạch</button>
+  <button class="hbtn" id="hProj">🧩 Dự án</button>
+  <button class="hbtn acc" id="hSave">💾 Lưu</button>
+  <button class="hbtn" id="hOpen">📂 Mở</button>
+  <button class="hbtn" id="hExport">⬇ Xuất file</button>
+  <button class="hbtn" id="hImport">⬆ Nhập file</button>
+</header>
+<div id="mobTabs"><button class="btn" data-m="code">💻 Code</button><button class="btn pri" data-m="circ">🔌 Mạch</button></div>
+<main>
+  <section id="left" class="panel">
+    <div class="ptitle">💻 Code Arduino
+      <div class="sp"></div>
+      <button class="btn run" id="bRun">▶ Chạy</button>
+      <button class="btn stop" id="bStop" disabled>■ Dừng</button>
+      <button class="btn" id="bSample" title="Khôi phục code mẫu của bài">↺ Code mẫu</button>
+    </div>
+    <div class="editor"><pre id="gutter">1</pre><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>
+    <div class="serial">
+      <div class="stitle">🖥 Serial Monitor <span id="runState">● Đang dừng</span><div class="sp"></div><button class="btn" id="bClear">Xóa</button></div>
+      <div id="serialOut"></div>
+    </div>
+  </section>
+  <section id="right" class="panel">
+    <div class="rtabs">
+      <button data-tab="circuit" class="on">🔌 Mạch mô phỏng</button>
+      <button data-tab="xz">🤖 xiaozhi.me (mô phỏng)<span class="dot" id="xzDot"></span></button>
+    </div>
+    <div id="tab-circuit">
+      <div id="guide"></div>
+      <div id="canvasWrap"><svg id="svg" viewBox="0 0 1100 680" role="img" aria-label="Mạch mô phỏng"></svg><div id="tip"></div></div>
+      <div id="statusBar"></div>
+      <div id="controls"></div>
+    </div>
+    <div id="tab-xz" hidden></div>
+  </section>
+</main>
+<div id="modal" hidden><div class="mbox"><button class="mclose" id="mClose" aria-label="Đóng">×</button><div id="mBody"></div></div></div>
+<div id="toasts"></div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+
+<script>
+"use strict";
+/* =========================================================
+   1. DỮ LIỆU: BOARD, MODULE, DỰ ÁN, CODE MẪU
+   ========================================================= */
+const CODE = {
+blink:`// Bài 1: Nháy LED
+// LED được nối vào chân GPIO2
+#define LED_PIN 2
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("Bat dau nhay LED!");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);   // bật đèn
+  Serial.println("LED: BAT");
+  delay(500);
+  digitalWrite(LED_PIN, LOW);    // tắt đèn
+  Serial.println("LED: TAT");
+  delay(500);
+}
+`,
+button:`// Bài 2: Nút nhấn điều khiển LED
+#define BUTTON_PIN 4
+#define LED_PIN 2
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);  // dùng điện trở kéo lên bên trong
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  int trangThai = digitalRead(BUTTON_PIN);
+  if (trangThai == LOW) {             // LOW nghĩa là đang nhấn
+    digitalWrite(LED_PIN, HIGH);
+    Serial.println("Dang nhan nut!");
+  } else {
+    digitalWrite(LED_PIN, LOW);
+  }
+  delay(100);
+}
+`,
+pot:`// Bài 3: Biến trở chỉnh độ sáng LED
+#define POT_PIN 34
+#define LED_PIN 2
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  int giaTri = analogRead(POT_PIN);            // 0 - 4095
+  int doSang = map(giaTri, 0, 4095, 0, 255);   // đổi sang 0 - 255
+  analogWrite(LED_PIN, doSang);
+  Serial.print("Bien tro: ");
+  Serial.print(giaTri);
+  Serial.print("  -> Do sang: ");
+  Serial.println(doSang);
+  delay(300);
+}
+`,
+thermo:`// Bài 4: Trạm thời tiết mini (DHT22 + màn OLED)
+#include <DHT.h>
+#include "OLED.h"
+
+#define DHT_PIN 4
+DHT dht(DHT_PIN, DHT22);
+OLED oled(21, 22);        // SDA = 21, SCL = 22
+
+void setup() {
+  Serial.begin(115200);
+  dht.begin();
+  oled.begin();
+}
+
+void loop() {
+  float nhietDo = dht.readTemperature();
+  float doAm = dht.readHumidity();
+
+  oled.clear();
+  oled.setTextSize(1);
+  oled.println("TRAM THOI TIET");
+  oled.setTextSize(2);
+  oled.println(String(nhietDo, 1) + " C");
+  oled.setTextSize(1);
+  oled.println("Do am: " + String(doAm, 0) + "%");
+  oled.display();
+
+  Serial.print("Nhiet do: ");
+  Serial.println(nhietDo);
+  delay(2000);
+}
+`,
+chatbot:`// Robot trợ lý giọng nói AI mini (XiaoZhi AI)
+// Sơ đồ chân theo bo "bread-compact-wifi" (ESP32-S3)
+#include <WiFi.h>
+#include "OLED.h"
+#include "XiaoZhi.h"
+
+const char* WIFI_TEN = "NhaCuaEm";       // tên Wi-Fi (ESP32 chỉ bắt 2.4 GHz)
+const char* WIFI_MATKHAU = "12345678";
+
+OLED oled(41, 42);        // SDA = 41, SCL = 42
+XiaoZhi robot(oled);      // micro: WS 4, SCK 5, SD 6 | ampli: DIN 7, BCLK 15, LRC 16
+
+void setup() {
+  Serial.begin(115200);
+  oled.begin();
+  oled.println("Dang ket noi Wi-Fi");
+
+  WiFi.begin(WIFI_TEN, WIFI_MATKHAU);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.println("Da ket noi Wi-Fi!");
+
+  robot.begin();   // kết nối xiaozhi.me (lần đầu sẽ hiện mã kích hoạt)
+}
+
+void loop() {
+  String cauHoi = robot.listen();          // nghe học sinh nói
+  if (cauHoi.length() > 0) {
+    Serial.println("Ban: " + cauHoi);
+    String traLoi = robot.ask(cauHoi);     // gửi lên mô hình AI (LLM)
+    Serial.println("Robot: " + traLoi);
+    robot.speak(traLoi);                   // phát ra loa
+  }
+}
+`,
+free:`// Chế độ tự do: viết code của em ở đây
+#define LED_PIN 2   // LED có sẵn trên board
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.println("Xin chao ESP32!");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_PIN, LOW);
+  delay(1000);
+}
+`};
+
+const BOARDS = {
+  esp32:{
+    name:'ESP32 DevKit V1 (30 chân)', short:'ESP32', chip:'ESP32-WROOM-32', ic:'🟦',
+    left:['EN','G36:VP','G39:VN','G34','G35','G32','G33','G25','G26','G27','G14','G12','G13','GND','5V:VIN'],
+    right:['G23','G22','G1:TX0','G3:RX0','G21','G19','G18','G5','G17:TX2','G16:RX2','G4','G2','G15','GND','3V3'],
+    pitch:26, x:460, y:100,
+    info:{inputOnly:[34,35,36,39],strap:[0,2,5,12,15],uart:[1,3],usb:[],forbid:[6,7,8,9,10,11],
+      adc1:[32,33,34,35,36,39],adc2:[0,2,4,12,13,14,15,25,26,27],i2c:{sda:21,scl:22},led:2},
+    desc:'Board phổ biến nhất để học. Chip ESP32 lõi kép 240 MHz, có sẵn Wi-Fi và Bluetooth.',
+    usage:['Cắm cáp USB vào máy tính để vừa cấp điện vừa nạp code.','Trong Arduino IDE chọn bo “ESP32 Dev Module”.','Mức logic 3.3V: không đưa tín hiệu 5V vào chân GPIO.','LED xanh trên board nối với GPIO2: thử nháy LED được ngay, không cần linh kiện.','I²C mặc định: SDA = GPIO21, SCL = GPIO22.','Chân 34, 35, 36 (VP), 39 (VN) chỉ đọc được, không xuất tín hiệu.'],
+    combos:['led','button','pot','dht22','oled'], projects:['blink','button','pot','thermo']
+  },
+  esp32s3:{
+    name:'ESP32-S3-DevKitC-1 N16R8 (44 chân)', short:'ESP32-S3', chip:'ESP32-S3-WROOM-1 N16R8', ic:'🟪',
+    left:['3V3','3V3','RST','G4','G5','G6','G7','G15','G16','G17','G18','G8','G3','G46','G9','G10','G11','G12','G13','G14','5V','GND'],
+    right:['GND','G43:TX','G44:RX','G1','G2','G42','G41','G40','G39','G38','G37','G36','G35','G0','G45','G48','G47','G21','G20','G19','GND','GND'],
+    pitch:24, x:460, y:40,
+    info:{inputOnly:[],strap:[0,3,45,46],uart:[43,44],usb:[19,20],forbid:[35,36,37],
+      adc1:[1,2,3,4,5,6,7,8,9,10],adc2:[11,12,13,14,15,16,17,18,19,20],i2c:{sda:8,scl:9},led:48},
+    desc:'Mạnh hơn, có lệnh tăng tốc AI, 16 MB Flash + 8 MB PSRAM. Dùng cho robot giọng nói, camera, màn hình.',
+    usage:['Có 2 cổng USB-C (“USB” và “UART”), cổng nào cũng nạp code được.','Trong Arduino IDE chọn bo “ESP32S3 Dev Module”, bật PSRAM “OPI PSRAM”.','Bản N16R8 dùng PSRAM kiểu octal nên GPIO35, 36, 37 bị chiếm: không dùng.','LED RGB trên board nằm ở GPIO48.','Âm thanh I²S (micro, ampli) gán được vào hầu hết các chân GPIO.','GPIO19, 20 là chân USB; GPIO0, 3, 45, 46 là chân strapping.'],
+    combos:['mic','amp','speaker','oled','led','button'], projects:['chatbot']
+  }
+};
+
+const MODS = {
+  led:{name:'Đèn LED (có điện trở 220Ω)',short:'LED',ic:'💡',w:170,body:'#fff7ed',
+    pins:[{id:'A',label:'+ (chân dài)',need:'out'},{id:'K',label:'− (chân ngắn)',need:'gnd'}],
+    volt:'Điều khiển bằng GPIO (3.3V), dòng khoảng 10 mA',
+    desc:'Phát sáng khi dòng điện chạy từ chân + sang chân −. LED có chiều: cắm ngược sẽ không sáng.',
+    usage:['Chân dài (+) nối vào một chân GPIO (qua điện trở 220Ω, mô phỏng đã có sẵn).','Chân ngắn (−) nối GND.','digitalWrite(chân, HIGH) để bật, LOW để tắt; analogWrite(chân, 0–255) để chỉnh độ sáng.'],
+    sample:'blink'},
+  button:{name:'Nút nhấn',short:'Nút nhấn',ic:'🔘',w:170,body:'#f1f5f9',
+    pins:[{id:'P1',label:'Chân 1',need:'in'},{id:'P2',label:'Chân 2',need:'gnd'}],
+    volt:'Không cần nguồn riêng',
+    desc:'Khi nhấn, hai chân được nối thông với nhau.',
+    usage:['Một chân nối GPIO, chân kia nối GND.','Khai báo pinMode(chân, INPUT_PULLUP): bình thường đọc được HIGH, khi nhấn đọc được LOW.','Nếu chỉ dùng INPUT (không PULLUP), chân bị “thả nổi” và đọc ra giá trị lung tung.'],
+    sample:'button'},
+  pot:{name:'Biến trở 10kΩ',short:'Biến trở',ic:'🎛',w:170,body:'#f0fdf4',
+    pins:[{id:'VCC',label:'VCC',need:'3v3'},{id:'OUT',label:'OUT (giữa)',need:'adc'},{id:'GND',label:'GND',need:'gnd'}],
+    volt:'3.3V',
+    desc:'Núm vặn tạo ra điện áp thay đổi từ 0 đến 3.3V. ESP32 đọc thành số 0–4095.',
+    usage:['Hai chân ngoài nối 3V3 và GND, chân giữa nối vào chân có ADC.','Trên ESP32 nên dùng ADC1 (GPIO32–39): ADC2 không đọc được khi bật Wi-Fi.','Dùng analogRead(chân) để đọc giá trị.'],
+    sample:'pot'},
+  dht22:{name:'Cảm biến nhiệt độ - độ ẩm DHT22',short:'DHT22',ic:'🌡',w:170,body:'#eff6ff',
+    pins:[{id:'VCC',label:'VCC',need:'pwr'},{id:'DATA',label:'DATA',need:'io'},{id:'GND',label:'GND',need:'gnd'}],
+    volt:'3.3V – 5V',
+    desc:'Đo nhiệt độ (−40 đến 80°C) và độ ẩm không khí, đọc tối đa 1 lần mỗi 2 giây.',
+    usage:['VCC nối 3V3, GND nối GND, DATA nối một chân GPIO.','Dùng thư viện DHT: DHT dht(chân, DHT22); rồi dht.readTemperature().','Đọc quá nhanh (dưới 2 giây) sẽ ra giá trị lỗi.'],
+    sample:'thermo'},
+  oled:{name:'Màn OLED 0.96" SSD1306 (I²C)',short:'OLED',ic:'🖥',w:214,body:'#1e3a8a',dark:true,
+    pins:[{id:'GND',label:'GND',need:'gnd'},{id:'VCC',label:'VCC',need:'pwr'},{id:'SCL',label:'SCL',need:'io'},{id:'SDA',label:'SDA',need:'io'}],
+    volt:'3.3V – 5V',
+    desc:'Màn hình nhỏ 128×64 điểm, giao tiếp I²C chỉ cần 2 dây tín hiệu SDA và SCL.',
+    usage:['VCC nối 3V3, GND nối GND.','ESP32: SDA → GPIO21, SCL → GPIO22 (mặc định). ESP32-S3 (robot XiaoZhi): SDA → 41, SCL → 42.','Cắm đảo SDA và SCL thì màn sẽ không hiện gì.','Màn OLED thật thường không hiển thị được dấu tiếng Việt.'],
+    sample:'thermo'},
+  mic:{name:'Micro INMP441 (I²S)',short:'Micro INMP441',ic:'🎤',w:180,body:'#4c1d95',dark:true,
+    pins:[{id:'VDD',label:'VDD',need:'3v3only'},{id:'GND',label:'GND',need:'gnd'},{id:'LR',label:'L/R',need:'gnd'},{id:'WS',label:'WS',need:'out'},{id:'SCK',label:'SCK',need:'out'},{id:'SD',label:'SD',need:'in'}],
+    volt:'Chỉ 3.3V (cấp 5V có thể hỏng)',
+    desc:'Micro kỹ thuật số MEMS, gửi âm thanh về ESP32 qua chuẩn I²S.',
+    usage:['VDD nối 3V3 (tuyệt đối không nối 5V), GND nối GND.','L/R nối GND để chọn kênh trái.','WS, SCK, SD nối vào 3 chân GPIO; robot XiaoZhi dùng WS = 4, SCK = 5, SD = 6.'],
+    sample:'chatbot'},
+  amp:{name:'Ampli MAX98357A (I²S)',short:'Ampli MAX98357A',ic:'🔊',w:180,body:'#5b21b6',dark:true,
+    pins:[{id:'VIN',label:'VIN',need:'pwr'},{id:'GND',label:'GND',need:'gnd'},{id:'DIN',label:'DIN',need:'out'},{id:'BCLK',label:'BCLK',need:'out'},{id:'LRC',label:'LRC',need:'out'},{id:'SPKP',label:'Loa +',need:'spk'},{id:'SPKN',label:'Loa −',need:'spk'}],
+    volt:'3.3V – 5V (5V cho tiếng to hơn)',
+    desc:'Nhận âm thanh số từ ESP32 qua I²S và khuếch đại để phát ra loa, công suất khoảng 3W.',
+    usage:['VIN nối 5V, GND nối GND.','DIN, BCLK, LRC nối vào 3 chân GPIO; robot XiaoZhi dùng DIN = 7, BCLK = 15, LRC = 16.','Hai cực loa nối vào “Loa +” và “Loa −” trên ampli, không nối thẳng loa vào ESP32.'],
+    sample:'chatbot'},
+  speaker:{name:'Loa 4Ω 3W',short:'Loa',ic:'📢',w:150,body:'#f8fafc',
+    pins:[{id:'P',label:'+',need:'amp'},{id:'N',label:'−',need:'amp'}],
+    volt:'Nhận tín hiệu từ ampli',
+    desc:'Biến tín hiệu điện thành âm thanh.',
+    usage:['Nối 2 dây loa vào cực “Loa +” và “Loa −” của ampli.','Không nối loa trực tiếp vào chân ESP32: chân GPIO không đủ dòng.'],
+    sample:'chatbot'}
+};
+
+const PROJECTS = {
+  blink:{title:'Nháy LED',ic:'💡',level:'Dễ',board:'esp32',code:'blink',
+    desc:'Làm quen: nối 1 đèn LED và cho nó nhấp nháy.',
+    comps:[{id:'led1',type:'led',x:850,y:380}],
+    steps:[
+      {title:'Nối chân dài (+) của LED vào GPIO2',desc:'Chân + của LED nhận tín hiệu điều khiển từ ESP32.',conns:[['led1','A','G2']],hint:'Mở code bên trái, tìm dòng #define LED_PIN. Số ở đó là chân GPIO cần nối.'},
+      {title:'Nối chân ngắn (−) của LED về GND',desc:'Dòng điện cần đường quay về để mạch kín.',conns:[['led1','K','GND']],hint:'Mọi mạch điện cần một đường về “đất”. Trên board, chân nào có chữ GND?'}
+    ]},
+  button:{title:'Nút nhấn bật đèn',ic:'🔘',level:'Dễ',board:'esp32',code:'button',
+    desc:'Nhấn nút thì LED sáng, thả ra thì tắt.',
+    comps:[{id:'btn1',type:'button',x:850,y:420},{id:'led1',type:'led',x:850,y:200}],
+    steps:[
+      {title:'Nối nút nhấn',desc:'Một chân vào GPIO4, một chân về GND.',conns:[['btn1','P1','G4'],['btn1','P2','GND']],hint:'Code dùng BUTTON_PIN là chân mấy? Chân còn lại của nút đi đâu để khi nhấn thì đọc được LOW?'},
+      {title:'Nối đèn LED',desc:'Chân + vào GPIO2, chân − về GND.',conns:[['led1','A','G2'],['led1','K','GND']],hint:'Giống bài Nháy LED: chân dài là chân điều khiển.'}
+    ]},
+  pot:{title:'Biến trở chỉnh độ sáng',ic:'🎛',level:'Vừa',board:'esp32',code:'pot',
+    desc:'Đọc tín hiệu analog và điều khiển độ sáng bằng PWM.',
+    comps:[{id:'pot1',type:'pot',x:120,y:320},{id:'led1',type:'led',x:850,y:360}],
+    steps:[
+      {title:'Cấp nguồn cho biến trở',desc:'Hai chân ngoài nối 3V3 và GND.',conns:[['pot1','VCC','3V3'],['pot1','GND','GND']],hint:'Biến trở là một “cầu chia điện áp”: một đầu ở mức cao nhất (3V3), một đầu ở 0V (GND).'},
+      {title:'Nối chân giữa vào GPIO34',desc:'GPIO34 có bộ chuyển đổi analog (ADC1).',conns:[['pot1','OUT','G34']],hint:'Tìm POT_PIN trong code. Chân này nằm ở cột bên trái của board.'},
+      {title:'Nối đèn LED',desc:'Chân + vào GPIO2, chân − về GND.',conns:[['led1','A','G2'],['led1','K','GND']],hint:'analogWrite cần một chân xuất tín hiệu, không phải chân chỉ đọc.'}
+    ]},
+  thermo:{title:'Trạm thời tiết mini',ic:'🌡',level:'Vừa',board:'esp32',code:'thermo',
+    desc:'Đo nhiệt độ, độ ẩm bằng DHT22 và hiện lên màn OLED.',
+    comps:[{id:'dht1',type:'dht22',x:120,y:250},{id:'oled1',type:'oled',x:820,y:150}],
+    steps:[
+      {title:'Nối cảm biến DHT22',desc:'VCC → 3V3, DATA → GPIO4, GND → GND.',conns:[['dht1','VCC','3V3',['5V']],['dht1','DATA','G4'],['dht1','GND','GND']],hint:'Cảm biến cần nguồn (VCC, GND) và một dây dữ liệu. DHT_PIN trong code là chân mấy?'},
+      {title:'Nối màn OLED (I²C)',desc:'VCC → 3V3, GND → GND, SDA → GPIO21, SCL → GPIO22.',conns:[['oled1','VCC','3V3',['5V']],['oled1','GND','GND'],['oled1','SDA','G21'],['oled1','SCL','G22']],hint:'Dòng OLED oled(21, 22) cho biết: số đầu là SDA, số sau là SCL.'}
+    ]},
+  chatbot:{title:'Robot trợ lý giọng nói XiaoZhi AI',ic:'🤖',level:'Khó',board:'esp32s3',code:'chatbot',
+    desc:'Ráp micro, ampli, loa, màn OLED; kết nối Wi-Fi và xiaozhi.me để trò chuyện với AI.',
+    comps:[{id:'mic1',type:'mic',x:90,y:40},{id:'amp1',type:'amp',x:90,y:285},{id:'spk1',type:'speaker',x:110,y:510},{id:'oled1',type:'oled',x:820,y:120}],
+    steps:[
+      {title:'Cấp nguồn cho micro INMP441',desc:'VDD → 3V3, GND → GND, L/R → GND.',conns:[['mic1','VDD','3V3'],['mic1','GND','GND'],['mic1','LR','GND']],hint:'Micro INMP441 chỉ chịu được một mức điện áp. Mức nào? Chân L/R chọn kênh trái khi nối xuống đâu?'},
+      {title:'Nối tín hiệu micro (I²S)',desc:'WS → GPIO4, SCK → GPIO5, SD → GPIO6.',conns:[['mic1','WS','G4'],['mic1','SCK','G5'],['mic1','SD','G6']],hint:'Đọc dòng chú thích cạnh XiaoZhi robot(oled) trong code: micro dùng WS 4, SCK 5, SD 6. Các chân này nằm ở cột trái của board.'},
+      {title:'Cấp nguồn cho ampli MAX98357A',desc:'VIN → 5V, GND → GND.',conns:[['amp1','VIN','5V',['3V3']],['amp1','GND','GND']],hint:'Ampli cần điện mạnh để loa kêu to. Chân 5V nằm gần cuối cột trái.'},
+      {title:'Nối tín hiệu ampli (I²S)',desc:'DIN → GPIO7, BCLK → GPIO15, LRC → GPIO16.',conns:[['amp1','DIN','G7'],['amp1','BCLK','G15'],['amp1','LRC','G16']],hint:'Chú thích trong code: ampli dùng DIN 7, BCLK 15, LRC 16.'},
+      {title:'Nối loa vào ampli',desc:'Loa + → “Loa +” của ampli, Loa − → “Loa −”.',conns:[['spk1','P','amp1.SPKP',['amp1.SPKN']],['spk1','N','amp1.SPKN',['amp1.SPKP']]],hint:'Loa không nối vào board mà nối vào 2 chân “Loa +” và “Loa −” ở cuối ampli.'},
+      {title:'Nối màn OLED',desc:'VCC → 3V3, GND → GND, SDA → GPIO41, SCL → GPIO42.',conns:[['oled1','VCC','3V3',['5V']],['oled1','GND','GND'],['oled1','SDA','G41'],['oled1','SCL','G42']],hint:'Dòng OLED oled(41, 42): SDA = 41, SCL = 42. Hai chân này ở cột phải của board.'},
+      {title:'Chạy code, kết nối Wi-Fi & ghép nối xiaozhi.me',desc:'Bấm ▶ Chạy. Khi màn OLED hiện mã 6 số, mở tab xiaozhi.me để thêm thiết bị, rồi trò chuyện với robot.',conns:[],special:'pair',hint:'Wi-Fi giả lập tên “NhaCuaEm”, mật khẩu “12345678”. Mạng “NhaCuaEm_5G” là 5 GHz, ESP32 không bắt được!'}
+    ]}
+};
+
+const WIFI_NETS = [{ssid:'NhaCuaEm',pass:'12345678',band:'2.4 GHz'},{ssid:'NhaCuaEm_5G',pass:'12345678',band:'5 GHz'},{ssid:'TruongHoc_Guest',pass:'hocsinh2026',band:'2.4 GHz'}];
+const SIDE_X = 550;
+
+/* =========================================================
+   2. TRẠNG THÁI
+   ========================================================= */
+let S = null;   // trạng thái bài đang làm (được lưu)
+let UI = {pending:null, selWire:null, selComp:null, drag:null, hintLv:{}, guideAll:false, tab:'circuit', lastPinInfo:''};
+const SIM = {running:false, out:{}, pwm:{}, mode:{}, pressed:{}, env:{pot:{},temp:28,hum:65}, wifi:{state:'off',ssid:null,since:0,hinted:false},
+  oled:{}, xzOnline:false, listening:false, speaking:false, warned:{}, t0:0};
+
+function freshState(boardId, projectId){
+  const P = projectId ? PROJECTS[projectId] : null;
+  return {v:1, name:'', board:boardId, project:projectId||null,
+    comps:P ? P.comps.map(c=>({...c})) : [], wires:[],
+    code:P ? CODE[P.code] : CODE.free,
+    xz:{loggedIn:false,user:'',paired:false,device:null,persona:{name:'Tiểu Trí',style:'vui vẻ, thân thiện, hay khen ngợi',model:'Qwen (mô phỏng)'}},
+    nextWire:1};
+}
+const B = ()=>BOARDS[S.board];
+const P = ()=>S.project ? PROJECTS[S.project] : null;
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* =========================================================
+   3. BOARD: CHÂN & THÔNG TIN
+   ========================================================= */
+const PIN_CACHE = {};
+function boardPins(bid){
+  if(PIN_CACHE[bid]) return PIN_CACHE[bid];
+  const b = BOARDS[bid], pins=[];
+  [['L',b.left],['R',b.right]].forEach(([side,arr])=>arr.forEach((tok,i)=>{
+    let [main,alias] = tok.split(':'); let net=main, gpio=null, label=main;
+    if(/^G\d+$/.test(main)){ gpio=+main.slice(1); label = alias? `${gpio} ${alias}`: String(gpio); }
+    else if(main==='5V'){ label = alias||'5V'; }
+    pins.push({id:side+i, side, idx:i, net, gpio, label});
+  }));
+  return PIN_CACHE[bid]=pins;
+}
+function bpin(id){ return boardPins(S.board).find(p=>p.id===id); }
+function pinKind(b,p){
+  if(p.net==='3V3'||p.net==='5V') return 'pwr';
+  if(p.net==='GND') return 'gnd';
+  if(p.gpio===null) return 'ctrl';
+  const I=b.info, g=p.gpio;
+  if(I.forbid.includes(g)) return 'forbid';
+  if(I.inputOnly.includes(g)) return 'inonly';
+  if(I.strap.includes(g)) return 'strap';
+  if(I.uart.includes(g)||I.usb.includes(g)) return 'uart';
+  return 'io';
+}
+const KIND_COLOR = {pwr:'#e11d48',gnd:'#0f172a',ctrl:'#94a3b8',forbid:'#64748b',inonly:'#a855f7',strap:'#f59e0b',uart:'#38bdf8',io:'#22c55e'};
+function pinText(b,p){
+  if(p.net==='3V3') return '3V3: nguồn 3.3V cho cảm biến, module 3.3V.';
+  if(p.net==='5V') return `${p.label}: 5V lấy từ cổng USB. Dùng cho module cần 5V (ampli). Không nối vào chân GPIO.`;
+  if(p.net==='GND') return 'GND: mát / đất, cực âm chung của mạch.';
+  if(p.gpio===null) return `${p.label}: chân reset, không nối linh kiện.`;
+  const I=b.info, g=p.gpio, t=[`GPIO${g}`];
+  if(I.forbid.includes(g)) t.push('⛔ KHÔNG DÙNG: nối với Flash/PSRAM bên trong');
+  if(I.inputOnly.includes(g)) t.push('chỉ đọc (input-only), không có điện trở kéo lên');
+  if(I.strap.includes(g)) t.push('⚠ chân strapping (ảnh hưởng lúc khởi động)');
+  if(I.uart.includes(g)) t.push('cổng Serial dùng để nạp code');
+  if(I.usb.includes(g)) t.push('chân USB D±');
+  if(I.adc1.includes(g)) t.push('đọc analog (ADC1)');
+  else if(I.adc2.includes(g)) t.push('đọc analog ADC2 (không dùng được khi bật Wi-Fi)');
+  if(I.i2c.sda===g) t.push('SDA mặc định (I²C)');
+  if(I.i2c.scl===g) t.push('SCL mặc định (I²C)');
+  if(I.led===g) t.push('nối LED trên board');
+  return t.join(' · ');
+}
+
+/* =========================================================
+   4. HÌNH HỌC & DÂY NỐI
+   ========================================================= */
+function boardGeom(){ const b=B(); const n=Math.max(b.left.length,b.right.length); return {x:b.x,y:b.y,w:180,h:n*b.pitch+78,top:b.y+44,pitch:b.pitch}; }
+function compGeom(c){
+  const M=MODS[c.type]; const n=M.pins.length; const h=Math.max(96, 26+n*24); const w=M.w;
+  const side = (c.x + w/2) < SIDE_X ? 'R' : 'L';
+  return {x:c.x,y:c.y,w,h,side,n};
+}
+function endPos(e){
+  if(e.c==='board'){
+    const g=boardGeom(), p=bpin(e.p); if(!p) return null;
+    const y=g.top + p.idx*g.pitch + g.pitch/2;
+    return p.side==='L' ? {x:g.x,y,d:-1} : {x:g.x+g.w,y,d:1};
+  }
+  const c=S.comps.find(c=>c.id===e.c); if(!c) return null;
+  const g=compGeom(c), M=MODS[c.type], i=M.pins.findIndex(p=>p.id===e.p); if(i<0) return null;
+  const y=g.y+26+i*24;
+  return g.side==='R' ? {x:g.x+g.w,y,d:1} : {x:g.x,y,d:-1};
+}
+const ekey = e=>e.c+'.'+e.p;
+function wiresAt(c,p){ return S.wires.filter(w=>(w.a.c===c&&w.a.p===p)||(w.b.c===c&&w.b.p===p)); }
+function otherEnd(w,c,p){ return (w.a.c===c&&w.a.p===p)? w.b : w.a; }
+function boardNets(c,p){ return wiresAt(c,p).map(w=>otherEnd(w,c,p)).filter(e=>e.c==='board').map(e=>bpin(e.p)).filter(Boolean); }
+function gpioOf(c,p){ const x=boardNets(c,p).find(bp=>bp.gpio!==null); return x? x.gpio : null; }
+function hasNet(c,p,net){ return boardNets(c,p).some(bp=>bp.net===net); }
+function resolveTarget(t){ // 'amp1.SPKP' | '@amp.SPKP' -> key
+  if(t.startsWith('@')){ const [type,pin]=t.slice(1).split('.'); const c=S.comps.find(c=>c.type===type); return c? c.id+'.'+pin : null; }
+  return t;
+}
+function connOk(c,p,t){
+  if(t.includes('.')){ const k=resolveTarget(t); if(!k) return false; return wiresAt(c,p).some(w=>ekey(otherEnd(w,c,p))===k); }
+  return hasNet(c,p,t);
+}
+function targetLabel(t){
+  if(t.includes('.')){ const k=resolveTarget(t)||t; const [cid,pid]=k.split('.'); const c=S.comps.find(c=>c.id===cid); if(!c) return t; const M=MODS[c.type]; return `chân “${M.pins.find(p=>p.id===pid).label}” của ${M.short}`; }
+  if(/^G\d+$/.test(t)) return 'GPIO'+t.slice(1);
+  return t;
+}
+function endLabel(e){
+  if(e.c==='board'){ const p=bpin(e.p); return p.gpio!==null? 'GPIO'+p.gpio : p.label; }
+  const c=S.comps.find(x=>x.id===e.c); const M=MODS[c.type]; return `${M.short} (${M.pins.find(p=>p.id===e.p).label})`;
+}
+
+/* ---------- Kiểm tra một dây nối ---------- */
+const R = (level,msg)=>({level,msg});
+function checkGeneric(w){
+  const A=w.a, Bn=w.b;
+  if(A.c==='board'&&Bn.c==='board'){
+    const p1=bpin(A.p), p2=bpin(Bn.p); const nets=[p1.net,p2.net];
+    if(nets.includes('GND')&&(nets.includes('3V3')||nets.includes('5V'))) return R('err','Chập mạch! Nối thẳng nguồn với GND sẽ làm nóng và hỏng board.');
+    if(nets.includes('3V3')&&nets.includes('5V')) return R('err','Không được nối 3V3 với 5V: hai nguồn khác mức điện áp.');
+    return R('warn','Nối hai chân của board với nhau không cần thiết. Hãy nối từ linh kiện vào board.');
+  }
+  if(A.c!=='board'&&Bn.c!=='board'){
+    const ca=S.comps.find(c=>c.id===A.c), cb=S.comps.find(c=>c.id===Bn.c);
+    const na=MODS[ca.type].pins.find(p=>p.id===A.p).need, nb=MODS[cb.type].pins.find(p=>p.id===Bn.p).need;
+    if((na==='amp'&&nb==='spk')||(na==='spk'&&nb==='amp')) return R('ok','Loa đã nối vào ampli.');
+    return R('warn','Hai linh kiện này không nối trực tiếp với nhau. Hãy nối từng linh kiện vào board.');
+  }
+  const ce = A.c==='board'? Bn : A, be = A.c==='board'? A : Bn;
+  const comp=S.comps.find(c=>c.id===ce.c), M=MODS[comp.type], mp=M.pins.find(p=>p.id===ce.p), bp=bpin(be.p);
+  return checkPin(comp,M,mp,bp);
+}
+function checkPin(comp,M,mp,bp){
+  const n=mp.need, nm=M.short, lb=mp.label;
+  const isPwr = bp.net==='3V3'||bp.net==='5V', isGnd=bp.net==='GND';
+  if(bp.gpio===null && !isPwr && !isGnd) return R('err',`Chân ${bp.label} là chân reset, không nối linh kiện vào đây.`);
+  if(n==='gnd'){
+    if(isGnd) return R('ok',`${nm}: ${lb} → GND`);
+    if(isPwr) return R('err',`Nguy hiểm: chân ${lb} của ${nm} phải về GND, em đang nối vào nguồn ${bp.net}.`);
+    return R('err',`Chân ${lb} của ${nm} phải nối GND (đất), không phải chân GPIO.`);
+  }
+  if(n==='3v3only'){
+    if(bp.net==='3V3') return R('ok',`${nm}: ${lb} → 3V3`);
+    if(bp.net==='5V') return R('err',`${nm} chỉ chịu được 3.3V! Cấp 5V có thể làm hỏng micro. Hãy nối vào 3V3.`);
+    if(isGnd) return R('err','Chân nguồn mà nối GND thì module không có điện.');
+    return R('warn',`Chân ${lb} là chân nguồn, nên nối vào 3V3 chứ không phải chân GPIO.`);
+  }
+  if(n==='3v3'||n==='pwr'){
+    if(bp.net==='3V3') return R('ok',`${nm}: ${lb} → 3V3`);
+    if(bp.net==='5V') return n==='pwr'? R('ok',`${nm}: ${lb} → 5V`) : R('warn','Biến trở nên dùng 3V3 để điện áp ra không vượt quá 3.3V mà ESP32 đọc được.');
+    if(isGnd) return R('err','Chân nguồn mà nối GND thì module không có điện.');
+    return R('warn',`Chân ${lb} là chân nguồn, nên nối vào 3V3 hoặc 5V, không phải chân GPIO.`);
+  }
+  if(n==='spk'||n==='amp') return R('err', n==='amp' ? 'Loa phải nối vào chân “Loa +/−” của ampli, không nối thẳng vào ESP32 (chân GPIO không đủ dòng).' : 'Chân này dành cho loa, không nối vào board.');
+  // chân tín hiệu
+  if(isPwr||isGnd){
+    if(comp.type==='led'&&mp.id==='A'&&isPwr) return R('warn','LED sẽ luôn sáng vì nối thẳng vào nguồn: code không điều khiển được. Hãy nối vào một chân GPIO.');
+    if(comp.type==='led'&&mp.id==='A'&&isGnd) return R('err','LED bị cắm ngược: chân dài (+) phải nối GPIO, chân ngắn (−) mới nối GND.');
+    return R('err',`Chân tín hiệu ${lb} của ${nm} không được nối vào ${bp.net}. Hãy chọn một chân GPIO.`);
+  }
+  if(comp.type==='led'&&mp.id==='K') return R('err','LED bị cắm ngược hoặc sai: chân ngắn (−) phải nối GND.');
+  const I=B().info, g=bp.gpio;
+  if(I.forbid.includes(g)) return R('err',`GPIO${g} đang được dùng cho bộ nhớ Flash/PSRAM bên trong chip. Tuyệt đối không dùng!`);
+  if(n==='out'&&I.inputOnly.includes(g)) return R('err',`GPIO${g} chỉ đọc được (input-only), không gửi tín hiệu ra ${nm} được.`);
+  if(n==='adc'){
+    if(!I.adc1.includes(g)&&!I.adc2.includes(g)) return R('err',`GPIO${g} không đọc được tín hiệu analog. Chọn chân có ADC.`);
+    if(I.adc2.includes(g)) return R('info',`GPIO${g} thuộc ADC2: sẽ không đọc được khi bật Wi-Fi. Nên dùng ADC1.`);
+  }
+  if(n==='in'&&I.inputOnly.includes(g)&&comp.type==='button') return R('warn',`GPIO${g} không có điện trở kéo lên bên trong, INPUT_PULLUP sẽ không có tác dụng. Nên chọn chân khác.`);
+  if(I.strap.includes(g)) return R('warn',`GPIO${g} là chân strapping (quyết định chế độ khởi động). Dùng được nhưng dễ gây lỗi khi nạp code; nên chọn chân khác.`);
+  if(I.uart.includes(g)) return R('warn',`GPIO${g} là cổng Serial dùng để nạp code và Serial Monitor. Nối linh kiện vào có thể làm hỏng việc nạp code.`);
+  if(I.usb.includes(g)) return R('warn',`GPIO${g} là chân USB. Dùng chân này sẽ mất cổng USB native.`);
+  return R('ok',`${nm}: ${lb} → GPIO${g}`);
+}
+function expectedFor(c,p){
+  const pr=P(); if(!pr) return null;
+  for(let si=0;si<pr.steps.length;si++) for(const cn of pr.steps[si].conns) if(cn[0]===c&&cn[1]===p) return {step:si,target:cn[2],alts:cn[3]||[]};
+  return null;
+}
+function checkWire(w){
+  const g=checkGeneric(w);
+  if(!P()) return g;
+  for(const e of [w.a,w.b]){
+    if(e.c==='board') continue;
+    const ex=expectedFor(e.c,e.p); if(!ex) continue;
+    const o=otherEnd(w,e.c,e.p);
+    const match = t=> t.includes('.') ? ekey(o)===resolveTarget(t) : (o.c==='board' && bpin(o.p).net===t);
+    if(match(ex.target)) return g.level==='err'? g : R('ok','Chính xác! '+endLabel(e)+' → '+targetLabel(ex.target));
+    if(ex.alts.some(match)){
+      if(e.p==='VIN') return R('info','Ampli chạy được ở 3.3V nhưng tiếng nhỏ hơn. Sơ đồ chuẩn dùng 5V.');
+      return R('ok','Được rồi! '+endLabel(e)+' → '+endLabel(o));
+    }
+    if(g.level==='err') return g;
+    return R('warn',`Theo sơ đồ, ${endLabel(e)} cần nối ${targetLabel(ex.target)}. Em đang nối ${endLabel(o)}: code của dự án sẽ không hoạt động đúng.`);
+  }
+  return g;
+}
+
+/* ---------- Tiến độ dự án ---------- */
+function stepStatus(){
+  const pr=P(); if(!pr) return null;
+  return pr.steps.map(st=>{
+    if(st.special==='pair') return {done:S.xz.paired && SIM.xzOnline, items:[]};
+    const items=st.conns.map(([c,p,t,alts])=>({c,p,t,ok:[t,...(alts||[])].some(x=>connOk(c,p,x))}));
+    const bad=S.wires.some(w=>{ const r=checkWire(w); return (r.level==='err'||r.level==='warn') && st.conns.some(([c,p])=>(w.a.c===c&&w.a.p===p)||(w.b.c===c&&w.b.p===p)); });
+    return {done:items.every(i=>i.ok)&&!bad, items, bad};
+  });
+}
+
+/* =========================================================
+   5. VẼ MẠCH (SVG)
+   ========================================================= */
+const svg=$('#svg');
+let rafId=0;
+function scheduleRender(){ if(rafId) return; rafId=requestAnimationFrame(()=>{rafId=0; renderSVG();}); }
+const WIRE_COLORS=['#2563eb','#16a34a','#d97706','#db2777','#0891b2','#7c3aed','#65a30d','#0d9488','#ea580c'];
+function wireColor(w,i){
+  const nets=[w.a,w.b].filter(e=>e.c==='board').map(e=>bpin(e.p).net);
+  if(nets.includes('3V3')||nets.includes('5V')) return '#e11d48';
+  if(nets.includes('GND')) return '#1e293b';
+  return WIRE_COLORS[(w.n||i)%WIRE_COLORS.length];
+}
+function wirePath(p1,p2){
+  const dx=Math.max(50,Math.min(140,Math.abs(p2.x-p1.x)/2));
+  return `M${p1.x} ${p1.y} C${p1.x+p1.d*dx} ${p1.y} ${p2.x+p2.d*dx} ${p2.y} ${p2.x} ${p2.y}`;
+}
+function renderSVG(){
+  const b=B(), g=boardGeom(); let h='';
+  h+=`<defs><filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="6"/></filter></defs>`;
+  // Board
+  h+=`<g><rect x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="14" fill="#18243b" stroke="#0b1220" stroke-width="2"/>`;
+  h+=`<rect x="${g.x+48}" y="${g.y+8}" width="${g.w-96}" height="30" rx="4" fill="#c7ccd4" stroke="#9aa3ae"/>`;
+  h+=`<text x="${g.x+g.w/2}" y="${g.y+28}" text-anchor="middle" font-size="12" font-weight="700" fill="#334155">${esc(b.short)}</text>`;
+  const usbY=g.y+g.h-20;
+  h+=`<rect x="${g.x+g.w/2-22}" y="${usbY}" width="44" height="22" rx="4" fill="#a3acb8" stroke="#6b7280"/>`;
+  h+=`<text x="${g.x+g.w/2}" y="${usbY+14}" text-anchor="middle" font-size="9" fill="#1f2937">USB</text>`;
+  const ledG=b.info.led, ledOn=(SIM.pwm[ledG]||0)>0;
+  h+=`<circle cx="${g.x+g.w/2+52}" cy="${usbY+8}" r="${ledOn?7:5}" fill="${ledOn?'#38bdf8':'#334155'}" ${ledOn?'filter="url(#glow)"':''}/><circle cx="${g.x+g.w/2+52}" cy="${usbY+8}" r="4" fill="${ledOn?'#bae6fd':'#475569'}"/>`;
+  h+=`<text x="${g.x+g.w/2+52}" y="${usbY-4}" text-anchor="middle" font-size="8.5" fill="#94a3b8">LED ${ledG}</text>`;
+  h+=`<text x="${g.x+g.w/2-52}" y="${usbY+12}" text-anchor="middle" font-size="8.5" fill="#94a3b8">BOOT</text>`;
+  boardPins(S.board).forEach(p=>{
+    const y=g.top+p.idx*g.pitch+g.pitch/2, x=p.side==='L'?g.x:g.x+g.w, k=pinKind(b,p);
+    const pend = UI.pending && UI.pending.c==='board' && UI.pending.p===p.id;
+    h+=`<g data-pin="board|${p.id}" style="cursor:pointer">`;
+    h+=`<circle cx="${x}" cy="${y}" r="12" fill="transparent"/>`;
+    h+=`<circle cx="${x}" cy="${y}" r="${pend?8:6}" fill="${KIND_COLOR[k]}" stroke="${pend?'#facc15':'#fff'}" stroke-width="${pend?3:1.5}"/>`;
+    if(k==='forbid') h+=`<path d="M${x-4} ${y-4}L${x+4} ${y+4}M${x+4} ${y-4}L${x-4} ${y+4}" stroke="#fff" stroke-width="1.6"/>`;
+    const tx=p.side==='L'?x+13:x-13;
+    h+=`<text x="${tx}" y="${y+4}" text-anchor="${p.side==='L'?'start':'end'}" font-size="11.5" font-weight="600" fill="${k==='forbid'?'#64748b':'#e2e8f0'}">${esc(p.label)}</text></g>`;
+  });
+  h+='</g>';
+  // Components
+  S.comps.forEach(c=>{ h+=renderComp(c); });
+  // Wires
+  const ws=S.wires.map((w,i)=>({w,i,r:checkWire(w)}));
+  ws.forEach(({w,i,r})=>{
+    const p1=endPos(w.a), p2=endPos(w.b); if(!p1||!p2) return;
+    const d=wirePath(p1,p2), col=wireColor(w,i), sel=UI.selWire===w.id;
+    const bad=r.level==='err'?'#dc2626':r.level==='warn'?'#ea580c':null;
+    h+=`<g data-wire="${w.id}" style="cursor:pointer">`;
+    h+=`<path d="${d}" stroke="transparent" stroke-width="14" fill="none"/>`;
+    if(sel) h+=`<path d="${d}" stroke="#facc15" stroke-width="9" fill="none" stroke-linecap="round" opacity=".7"/>`;
+    h+=`<path d="${d}" stroke="${bad||col}" stroke-width="${sel?4:3.2}" fill="none" stroke-linecap="round" ${bad?'stroke-dasharray="7 5"':''}/>`;
+    h+='</g>';
+  });
+  ws.forEach(({w,r})=>{
+    const p1=endPos(w.a), p2=endPos(w.b); if(!p1||!p2) return;
+    const mx=(p1.x+p2.x)/2, my=(p1.y+p2.y)/2;
+    if(r.level==='err'||r.level==='warn'){
+      h+=`<g data-wire="${w.id}" style="cursor:pointer"><circle cx="${mx}" cy="${my}" r="10" fill="${r.level==='err'?'#dc2626':'#ea580c'}" stroke="#fff" stroke-width="2"/><text x="${mx}" y="${my+4.5}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">!</text></g>`;
+    }
+    if(UI.selWire===w.id){
+      h+=`<g data-act="delwire" style="cursor:pointer"><rect x="${mx-38}" y="${my+14}" width="76" height="26" rx="13" fill="#b91c1c"/><text x="${mx}" y="${my+31}" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">✕ Xóa dây</text></g>`;
+    }
+  });
+  // pending
+  h+=`<path id="pend" d="" stroke="#facc15" stroke-width="3" stroke-dasharray="6 5" fill="none" pointer-events="none"/>`;
+  if(!S.comps.length && !P()){
+    h+=`<text x="${SIDE_X}" y="${g.y+g.h+30>660?40:g.y+g.h+30}" text-anchor="middle" font-size="14" fill="#5b6475">Mở 📘 Thư viện mạch để thêm linh kiện, hoặc chọn 🧩 Dự án</text>`;
+  }
+  svg.innerHTML=h;
+}
+function renderComp(c){
+  const M=MODS[c.type], g=compGeom(c), sel=UI.selComp===c.id, dark=!!M.dark;
+  const lblCol=dark?'#e9e5ff':'#334155';
+  let h=`<g data-comp="${c.id}">`;
+  h+=`<text x="${g.x+g.w/2}" y="${g.y-8}" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1c2433">${M.ic} ${esc(M.short)}</text>`;
+  h+=`<rect data-body="${c.id}" x="${g.x}" y="${g.y}" width="${g.w}" height="${g.h}" rx="10" fill="${M.body}" stroke="${sel?'#0f766e':'#c9c0ad'}" stroke-width="${sel?3:1.5}" style="cursor:grab"/>`;
+  // đồ họa
+  const gx = g.side==='R' ? g.x+42 : g.x+g.w-42, gy=g.y+g.h/2;
+  h+=compGraphic(c,M,g,gx,gy);
+  // chân
+  M.pins.forEach((p,i)=>{
+    const y=g.y+26+i*24, x=g.side==='R'?g.x+g.w:g.x;
+    const pend = UI.pending && UI.pending.c===c.id && UI.pending.p===p.id;
+    h+=`<g data-pin="${c.id}|${p.id}" style="cursor:pointer"><circle cx="${x}" cy="${y}" r="12" fill="transparent"/>`;
+    h+=`<circle cx="${x}" cy="${y}" r="${pend?8:6}" fill="#d4a017" stroke="${pend?'#facc15':'#7a5c00'}" stroke-width="${pend?3:1.5}"/>`;
+    h+=`<text x="${g.side==='R'?x-12:x+12}" y="${y+4}" text-anchor="${g.side==='R'?'end':'start'}" font-size="11" font-weight="600" fill="${lblCol}">${esc(p.label)}</text></g>`;
+  });
+  if(sel && !P()){
+    h+=`<g data-act="delcomp" data-id="${c.id}" style="cursor:pointer"><circle cx="${g.x+g.w}" cy="${g.y}" r="11" fill="#b91c1c" stroke="#fff" stroke-width="2"/><text x="${g.x+g.w}" y="${g.y+4.5}" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">✕</text></g>`;
+  }
+  return h+'</g>';
+}
+function compGraphic(c,M,g,gx,gy){
+  let h='';
+  if(c.type==='led'){
+    const br=ledBrightness(c);
+    if(br>0) h+=`<circle cx="${gx}" cy="${gy-6}" r="${18+br*10}" fill="#ef4444" opacity="${.25+br*.4}" filter="url(#glow)"/>`;
+    h+=`<path d="M${gx-13} ${gy-6} a13 13 0 0 1 26 0 v16 h-26z" fill="${br>0?`rgb(255,${Math.round(120-br*60)},${Math.round(120-br*80)})`:'#fca5a5'}" stroke="#b91c1c" stroke-width="1.5"/>`;
+    h+=`<rect x="${gx-16}" y="${gy+10}" width="32" height="4" fill="#b91c1c"/>`;
+    h+=`<line x1="${gx-6}" y1="${gy+14}" x2="${gx-6}" y2="${gy+34}" stroke="#94a3b8" stroke-width="2"/><line x1="${gx+6}" y1="${gy+14}" x2="${gx+6}" y2="${gy+28}" stroke="#94a3b8" stroke-width="2"/>`;
+  } else if(c.type==='button'){
+    const pr=!!SIM.pressed[c.id];
+    h+=`<g data-press="${c.id}" style="cursor:pointer"><rect x="${gx-22}" y="${gy-22}" width="44" height="44" rx="6" fill="#334155"/><circle cx="${gx}" cy="${gy}" r="${pr?11:14}" fill="${pr?'#0f766e':'#ef4444'}" stroke="#fff" stroke-width="2"/></g>`;
+    h+=`<text x="${gx}" y="${gy+38}" text-anchor="middle" font-size="9.5" fill="#64748b">giữ để nhấn</text>`;
+  } else if(c.type==='pot'){
+    const v=(SIM.env.pot[c.id]??2048)/4095, ang=-135+v*270, rad=ang*Math.PI/180;
+    h+=`<circle cx="${gx}" cy="${gy}" r="20" fill="#1e40af" stroke="#1e3a8a" stroke-width="2"/><line x1="${gx}" y1="${gy}" x2="${gx+Math.sin(rad)*16}" y2="${gy-Math.cos(rad)*16}" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
+    h+=`<text x="${gx}" y="${gy+36}" text-anchor="middle" font-size="10" fill="#334155">${Math.round(v*4095)}</text>`;
+  } else if(c.type==='dht22'){
+    h+=`<rect x="${gx-18}" y="${gy-26}" width="36" height="46" rx="4" fill="#f8fafc" stroke="#94a3b8"/>`;
+    for(let r=0;r<4;r++) for(let k=0;k<3;k++) h+=`<rect x="${gx-12+k*9}" y="${gy-20+r*9}" width="6" height="5" fill="#cbd5e1"/>`;
+    h+=`<text x="${gx}" y="${gy+36}" text-anchor="middle" font-size="10" fill="#334155">${SIM.env.temp}°C · ${SIM.env.hum}%</text>`;
+  } else if(c.type==='oled'){
+    const sx = g.side==='R' ? g.x+10 : g.x+g.w-150, sy=g.y+18, sw=140, sh=g.h-36;
+    h+=`<rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" rx="3" fill="#020617" stroke="#475569"/>`;
+    const st=SIM.oled[c.id];
+    if(st && st.on){
+      let yy=sy+14;
+      st.lines.slice(-6).forEach(l=>{ const fs=l.size>1?17:10.5; if(yy+ (l.size>1?6:0) > sy+sh-2) return; yy+= l.size>1?6:0; h+=`<text x="${sx+5}" y="${yy}" font-family="Roboto Mono,monospace" font-size="${fs}" fill="#7dd3fc">${esc(l.t.slice(0,l.size>1?11:22))}</text>`; yy+= l.size>1?18:12; });
+    } else {
+      h+=`<text x="${sx+sw/2}" y="${sy+sh/2+4}" text-anchor="middle" font-size="9.5" fill="#334155">(màn tắt)</text>`;
+    }
+  } else if(c.type==='mic'){
+    if(SIM.listening && micProblems().length===0) h+=`<circle cx="${gx}" cy="${gy}" r="30" fill="none" stroke="#c4b5fd" stroke-width="3" class="wave"/>`;
+    h+=`<rect x="${gx-16}" y="${gy-16}" width="32" height="32" rx="4" fill="#cbd5e1"/><circle cx="${gx}" cy="${gy}" r="6" fill="#1e293b"/>`;
+  } else if(c.type==='amp'){
+    h+=`<rect x="${gx-18}" y="${gy-18}" width="36" height="36" rx="3" fill="#111827"/><text x="${gx}" y="${gy+4}" text-anchor="middle" font-size="7" fill="#e5e7eb">98357</text>`;
+  } else if(c.type==='speaker'){
+    if(SIM.speaking) h+=`<path d="M${gx+ (g.side==='R'?-34:34)} ${gy-18} q${g.side==='R'?-12:12} 18 0 36" stroke="#0f766e" stroke-width="3" fill="none" class="wave"/><path d="M${gx+(g.side==='R'?-44:44)} ${gy-26} q${g.side==='R'?-16:16} 26 0 52" stroke="#0f766e" stroke-width="3" fill="none" class="wave"/>`;
+    h+=`<circle cx="${gx}" cy="${gy}" r="26" fill="#1f2937"/><circle cx="${gx}" cy="${gy}" r="17" fill="#374151"/><circle cx="${gx}" cy="${gy}" r="7" fill="#111827"/>`;
+  }
+  return h;
+}
+
+/* =========================================================
+   6. TƯƠNG TÁC TRÊN MẠCH
+   ========================================================= */
+function svgPt(ev){ const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+function parsePin(s){ const [c,p]=s.split('|'); return {c,p}; }
+function pinInfoText(e){
+  if(e.c==='board') return '📍 '+pinText(B(),bpin(e.p));
+  const c=S.comps.find(x=>x.id===e.c), M=MODS[c.type], mp=M.pins.find(p=>p.id===e.p);
+  const need={gnd:'nối GND',out:'nối chân GPIO (xuất tín hiệu)',in:'nối chân GPIO (đọc tín hiệu)',io:'nối chân GPIO','3v3':'nối 3V3','3v3only':'chỉ nối 3V3',pwr:'nối 3V3 hoặc 5V',adc:'nối chân có ADC (đọc analog)',spk:'nối vào loa',amp:'nối vào ampli'}[mp.need];
+  const ex=expectedFor(c.id,mp.id);
+  return `📍 ${M.short}, chân ${mp.label}: ${need}${ex?` · theo sơ đồ: ${targetLabel(ex.target)}`:''}`;
+}
+svg.addEventListener('pointerdown',ev=>{
+  const press=ev.target.closest('[data-press]');
+  if(press){ ev.stopPropagation(); setPressed(press.dataset.press,true); const up=()=>{setPressed(press.dataset.press,false); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);}; window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up); return; }
+  const body=ev.target.closest('[data-body]');
+  if(body){
+    const c=S.comps.find(x=>x.id===body.dataset.body), p=svgPt(ev);
+    UI.drag={id:c.id,dx:p.x-c.x,dy:p.y-c.y,moved:false,sx:p.x,sy:p.y};
+    try{ svg.setPointerCapture(ev.pointerId);}catch(e){}
+  }
+});
+svg.addEventListener('pointermove',ev=>{
+  const p=svgPt(ev);
+  if(UI.drag){
+    const d=UI.drag, c=S.comps.find(x=>x.id===d.id); if(!c) return;
+    if(Math.abs(p.x-d.sx)+Math.abs(p.y-d.sy)>4) d.moved=true;
+    if(d.moved){ c.x=Math.max(10,Math.min(1100-MODS[c.type].w-10,Math.round(p.x-d.dx))); c.y=Math.max(24,Math.min(600,Math.round(p.y-d.dy))); scheduleRender(); }
+    return;
+  }
+  if(UI.pending){ const a=endPos(UI.pending); const pe=document.getElementById('pend'); if(a&&pe) pe.setAttribute('d',`M${a.x} ${a.y} L${p.x} ${p.y}`); }
+});
+svg.addEventListener('pointerup',ev=>{
+  if(UI.drag){ const d=UI.drag; UI.drag=null; if(!d.moved){ UI.selComp = UI.selComp===d.id?null:d.id; UI.selWire=null; renderSVG(); } else { autosave(); renderAll(); } }
+});
+svg.addEventListener('click',ev=>{
+  const del=ev.target.closest('[data-act]');
+  if(del){ if(del.dataset.act==='delwire') removeWire(UI.selWire); else if(del.dataset.act==='delcomp') removeComp(del.dataset.id); return; }
+  const pin=ev.target.closest('[data-pin]');
+  if(pin){ onPinClick(parsePin(pin.dataset.pin)); return; }
+  const w=ev.target.closest('[data-wire]');
+  if(w){ const id=+w.dataset.wire; UI.selWire = UI.selWire===id?null:id; UI.selComp=null; const ww=S.wires.find(x=>x.id===id); if(ww){ const r=checkWire(ww); setPinInfo((r.level==='ok'?'✅ ':r.level==='info'?'ℹ️ ':'⚠️ ')+r.msg); } renderSVG(); return; }
+  if(!ev.target.closest('[data-comp]')){ UI.pending=null; UI.selWire=null; UI.selComp=null; renderSVG(); }
+});
+svg.addEventListener('pointerover',ev=>{
+  const pin=ev.target.closest('[data-pin]'); const tip=$('#tip');
+  if(!pin){ tip.style.display='none'; return; }
+  const e=parsePin(pin.dataset.pin); tip.textContent=pinInfoText(e).replace('📍 ','');
+  const r=$('#canvasWrap').getBoundingClientRect(); tip.style.display='block';
+  tip.style.left=Math.min(r.width-270,ev.clientX-r.left+14)+'px'; tip.style.top=(ev.clientY-r.top+14)+'px';
+});
+svg.addEventListener('pointerleave',()=>{$('#tip').style.display='none';});
+document.addEventListener('keydown',ev=>{
+  if(ev.target.tagName==='TEXTAREA'||ev.target.tagName==='INPUT') return;
+  if((ev.key==='Delete'||ev.key==='Backspace')&&UI.selWire){ removeWire(UI.selWire); ev.preventDefault(); }
+  if(ev.key==='Escape'){ UI.pending=null; UI.selWire=null; renderSVG(); }
+});
+function onPinClick(e){
+  setPinInfo(pinInfoText(e));
+  if(!UI.pending){ UI.pending=e; UI.selWire=null; renderSVG(); return; }
+  if(ekey(UI.pending)===ekey(e)){ UI.pending=null; renderSVG(); return; }
+  const a=UI.pending; UI.pending=null;
+  addWire(a,e,true);
+}
+function addWire(a,b,announce){
+  if(S.wires.some(w=>(ekey(w.a)===ekey(a)&&ekey(w.b)===ekey(b))||(ekey(w.a)===ekey(b)&&ekey(w.b)===ekey(a)))){ toast('Hai chân này đã được nối rồi.','info'); renderSVG(); return; }
+  const before = P()? stepStatus().map(s=>s.done) : null;
+  const w={id:S.nextWire++,n:S.wires.length,a,b}; S.wires.push(w);
+  const r=checkWire(w);
+  if(announce){
+    if(r.level==='ok') toast('✅ '+r.msg,'ok'); else if(r.level==='info') toast('ℹ️ '+r.msg,'info'); else toast((r.level==='err'?'⛔ ':'⚠️ ')+r.msg+' (bấm vào dây để xóa)',r.level);
+  }
+  if(before){ const after=stepStatus(); after.forEach((s,i)=>{ if(s.done&&!before[i]) setTimeout(()=>toast(`🎉 Xong bước ${i+1}: ${P().steps[i].title}`,'ok'),350); });
+    if(after.filter((s,i)=>!P().steps[i].special).every(s=>s.done) && !before.every(x=>x)) { const allWired=after.filter((s,i)=>!P().steps[i].special).every(s=>s.done); if(allWired) setTimeout(()=>toast('🏁 Ráp mạch xong! Bấm ▶ Chạy để thử.','ok'),800); } }
+  autosave(); renderAll();
+}
+function removeWire(id){ S.wires=S.wires.filter(w=>w.id!==id); UI.selWire=null; autosave(); renderAll(); }
+function removeComp(id){ S.comps=S.comps.filter(c=>c.id!==id); S.wires=S.wires.filter(w=>w.a.c!==id&&w.b.c!==id); UI.selComp=null; autosave(); renderAll(); }
+function setPinInfo(t){ UI.lastPinInfo=t; const el=$('#pinInfo'); if(el) el.textContent=t; }
+function setPressed(id,v){ SIM.pressed[id]=v; scheduleRender(); const b=document.querySelector(`[data-pbtn="${id}"]`); if(b) b.classList.toggle('on',v); }
+
+/* =========================================================
+   7. HƯỚNG DẪN (GUIDE) & BẢNG ĐIỀU KHIỂN
+   ========================================================= */
+function renderGuide(){
+  const el=$('#guide'), pr=P();
+  const badWires=S.wires.map(w=>({w,r:checkWire(w)})).filter(x=>x.r.level==='err'||x.r.level==='warn'||x.r.level==='info');
+  const alerts = badWires.length ? `<div class="alerts">${badWires.map(({w,r})=>`<div class="alert ${r.level}"><b>${r.level==='err'?'⛔ Sai':r.level==='warn'?'⚠️ Chú ý':'ℹ️ Lưu ý'}</b><span>${esc(endLabel(w.a))} ↔ ${esc(endLabel(w.b))}: ${esc(r.msg)}</span>${r.level!=='info'?`<button class="btn" data-delw="${w.id}">Xóa dây</button>`:''}</div>`).join('')}</div>` : '';
+  if(!pr){
+    el.innerHTML=`<div class="g-head"><span class="t">🧪 Chế độ tự do · ${esc(B().name)}</span><div class="sp"></div><button class="btn" id="gLib">📘 Thêm linh kiện</button></div>
+    <div class="g-body"><div class="step-now"><p style="margin:0">Bấm vào một chân để bắt đầu nối dây, rồi bấm vào chân thứ hai. Di chuột (hoặc chạm) vào chân để xem chân đó dùng làm gì. Nối sai sẽ có cảnh báo ngay.</p></div>${alerts}</div>`;
+  } else {
+    const st=stepStatus(); const done=st.filter(s=>s.done).length; const cur=st.findIndex(s=>!s.done);
+    const head=`<div class="g-head"><span class="t">${pr.ic} ${esc(pr.title)}</span><div class="prog"><i style="width:${Math.round(done/st.length*100)}%"></i></div><span style="font-weight:700;color:var(--muted)">${done}/${st.length}</span><div class="sp"></div><button class="btn" id="gAll">${UI.guideAll?'Thu gọn':'Tất cả bước'}</button></div>`;
+    let body='';
+    if(cur<0){
+      body=`<div class="step-now"><h4>🎉 Hoàn thành dự án!</h4><p>Em đã ráp đúng toàn bộ mạch${pr.steps.some(s=>s.special)?' và kết nối robot với xiaozhi.me':''}. Thử sửa code để tạo phiên bản của riêng em nhé, rồi bấm 💾 Lưu.</p></div>`;
+    } else {
+      const s=pr.steps[cur], lv=UI.hintLv[cur]||0;
+      const items=st[cur].items.map(it=>{ const c=S.comps.find(x=>x.id===it.c), M=MODS[c.type], lb=M.pins.find(p=>p.id===it.p).label; return `<li><span class="${it.ok?'ok':'no'}">${it.ok?'✓':'○'}</span>${esc(M.short)}: <b>${esc(lb)}</b> → ${esc(targetLabel(it.t))}</li>`; }).join('');
+      let hint='';
+      if(lv>=1) hint+=`<div class="hint">💡 <b>Gợi ý 1:</b> ${esc(s.hint)}</div>`;
+      if(lv>=2 && !s.special){ const miss=st[cur].items.find(i=>!i.ok); if(miss){ const c=S.comps.find(x=>x.id===miss.c),M=MODS[c.type]; hint+=`<div class="hint">🔎 <b>Gợi ý 2:</b> Nối chân <b>${esc(M.pins.find(p=>p.id===miss.p).label)}</b> của ${esc(M.short)} vào <b>${esc(targetLabel(miss.t))}</b>. Hai chân này đang nhấp nháy vàng trên mạch.</div>`; } }
+      const special = s.special==='pair' ? pairStatusHtml() : '';
+      body=`<div class="step-now"><h4>Bước ${cur+1}: ${esc(s.title)}</h4><p>${esc(s.desc)}</p>${items?`<ul class="cl">${items}</ul>`:''}${special}${hint}
+        <div class="g-actions"><button class="btn warn" id="gHint">💡 ${lv===0?'Em cần gợi ý':lv===1?'Gợi ý rõ hơn':'Xem lại gợi ý'}</button>${!s.special?`<button class="btn" id="gAuto">🪄 Nối giúp em 1 dây</button>`:`<button class="btn pri" id="gGoXz">Mở xiaozhi.me</button>`}</div></div>`;
+    }
+    if(UI.guideAll) body+=`<ol class="allsteps">${pr.steps.map((s,i)=>`<li class="${st[i].done?'done':i===cur?'cur':''}">${st[i].done?'✓ ':''}${esc(s.title)}</li>`).join('')}</ol>`;
+    el.innerHTML=head+`<div class="g-body">${body}${alerts}</div>`;
+  }
+  el.querySelectorAll('[data-delw]').forEach(b=>b.onclick=()=>removeWire(+b.dataset.delw));
+  const q=id=>el.querySelector(id);
+  if(q('#gLib')) q('#gLib').onclick=()=>openLibrary(S.board);
+  if(q('#gAll')) q('#gAll').onclick=()=>{UI.guideAll=!UI.guideAll; renderGuide();};
+  if(q('#gHint')) q('#gHint').onclick=()=>{ const cur=stepStatus().findIndex(s=>!s.done); UI.hintLv[cur]=Math.min(2,(UI.hintLv[cur]||0)+1); renderGuide(); blinkHint(); };
+  if(q('#gAuto')) q('#gAuto').onclick=autoConnect;
+  if(q('#gGoXz')) q('#gGoXz').onclick=()=>setTab('xz');
+  blinkHint();
+}
+function pairStatusHtml(){
+  const w=SIM.wifi.state==='ok', p=S.xz.paired, o=SIM.xzOnline;
+  const li=(ok,t)=>`<li><span class="${ok?'ok':'no'}">${ok?'✓':'○'}</span>${t}</li>`;
+  return `<ul class="cl">${li(SIM.running,'Code đang chạy')}${li(w,'Đã kết nối Wi-Fi')}${li(p,'Đã ghép nối với xiaozhi.me')}${li(o,'Robot trực tuyến, sẵn sàng trò chuyện')}</ul>`;
+}
+let blinkTimer=null;
+function blinkHint(){
+  clearInterval(blinkTimer); document.querySelectorAll('.hintblink').forEach(n=>n.remove());
+  const pr=P(); if(!pr) return; const st=stepStatus(); const cur=st.findIndex(s=>!s.done); if(cur<0||(UI.hintLv[cur]||0)<2) return;
+  const miss=st[cur].items.find(i=>!i.ok); if(!miss) return;
+  const pts=[endPos({c:miss.c,p:miss.p})];
+  if(miss.t.includes('.')){ const [c,p]=resolveTarget(miss.t).split('.'); pts.push(endPos({c,p})); }
+  else boardPins(S.board).filter(bp=>bp.net===miss.t).forEach(bp=>pts.push(endPos({c:'board',p:bp.id})));
+  let on=true;
+  const draw=()=>{ document.querySelectorAll('.hintblink').forEach(n=>n.remove()); if(!on) {on=true;return;} on=false;
+    pts.filter(Boolean).forEach(p=>{ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',13); c.setAttribute('fill','none'); c.setAttribute('stroke','#facc15'); c.setAttribute('stroke-width','4'); c.setAttribute('class','hintblink'); c.setAttribute('pointer-events','none'); svg.appendChild(c); }); };
+  draw(); blinkTimer=setInterval(draw,550);
+}
+function autoConnect(){
+  const st=stepStatus(); const cur=st.findIndex(s=>!s.done); if(cur<0) return;
+  // ưu tiên xóa dây sai của bước này
+  const s=P().steps[cur];
+  const bad=S.wires.find(w=>{ const r=checkWire(w); return (r.level==='err'||r.level==='warn') && s.conns.some(([c,p])=>(w.a.c===c&&w.a.p===p)||(w.b.c===c&&w.b.p===p)); });
+  if(bad){ removeWire(bad.id); toast('🧹 Đã xóa 1 dây sai. Bấm lần nữa để nối dây đúng.','info'); return; }
+  const miss=st[cur].items.find(i=>!i.ok); if(!miss) return;
+  let target;
+  if(miss.t.includes('.')){ const [c,p]=resolveTarget(miss.t).split('.'); target={c,p}; }
+  else { const used=new Set(S.wires.flatMap(w=>[w.a,w.b]).filter(e=>e.c==='board').map(e=>e.p)); const cand=boardPins(S.board).filter(bp=>bp.net===miss.t); const bp=cand.find(b=>!used.has(b.id))||cand[0]; target={c:'board',p:bp.id}; }
+  addWire({c:miss.c,p:miss.p},target,false);
+  toast('🪄 Đã nối giúp: '+endLabel({c:miss.c,p:miss.p})+' → '+targetLabel(miss.t)+'. Em tự nối các dây còn lại nhé!','info');
+}
+function renderStatus(){
+  const items=[['pwr','Nguồn'],['gnd','GND'],['io','GPIO dùng tốt'],['strap','Strapping (cẩn thận)'],['inonly','Chỉ đọc'],['uart','Serial/USB'],['forbid','Không dùng']];
+  $('#statusBar').innerHTML=items.map(([k,t])=>`<span class="lg"><i style="background:${KIND_COLOR[k]}"></i>${t}</span>`).join('')+`<span class="lg"><i style="background:#d4a017"></i>Chân linh kiện</span><div id="pinInfo">${esc(UI.lastPinInfo||'👆 Bấm một chân rồi bấm chân thứ hai để nối dây. Kéo thân linh kiện để di chuyển.')}</div>`;
+}
+function renderControls(){
+  const el=$('#controls'); let h='';
+  const pots=S.comps.filter(c=>c.type==='pot'), dhts=S.comps.filter(c=>c.type==='dht22'), btns=S.comps.filter(c=>c.type==='button');
+  if(pots.length||dhts.length||btns.length){
+    h+=`<div class="ctl"><h5>🎚 Bảng điều khiển cảm biến (giả lập thế giới thật)</h5>`;
+    pots.forEach(c=>{ const v=SIM.env.pot[c.id]??2048; h+=`<div class="ctlrow">🎛 Vặn biến trở <input type="range" min="0" max="4095" value="${v}" data-pot="${c.id}"><b data-potv="${c.id}">${v}</b></div>`; });
+    if(dhts.length) h+=`<div class="ctlrow">🌡 Nhiệt độ phòng <input type="range" min="-10" max="50" step="0.5" value="${SIM.env.temp}" id="envT"><b id="envTv">${SIM.env.temp}°C</b></div><div class="ctlrow">💧 Độ ẩm <input type="range" min="10" max="100" value="${SIM.env.hum}" id="envH"><b id="envHv">${SIM.env.hum}%</b></div>`;
+    btns.forEach(c=>{ h+=`<div class="ctlrow">🔘 <button class="pressbtn" data-pbtn="${c.id}">Giữ để nhấn nút</button></div>`; });
+    h+='</div>';
+  }
+  const hasAudio=S.comps.some(c=>c.type==='mic'||c.type==='amp') || S.project==='chatbot';
+  const usesWifi=/WiFi\.begin/.test(S.code);
+  if(usesWifi||hasAudio){
+    h+=`<div class="ctl"><h5>📶 Wi-Fi giả lập trong nhà em</h5>${WIFI_NETS.map(n=>`<div class="ctlrow">• <b>${esc(n.ssid)}</b> · ${n.band} · mật khẩu <code>${esc(n.pass)}</code>${n.band==='5 GHz'?' <span style="color:var(--orange)">(ESP32 không bắt được 5 GHz)</span>':''}</div>`).join('')}<div class="ctlrow" style="color:var(--muted)">Trạng thái: <b id="wifiSt">${wifiText()}</b></div></div>`;
+  }
+  if(hasAudio){
+    h+=`<div class="ctl chat"><h5 style="display:flex;align-items:center;gap:8px;margin:0">🤖 Trò chuyện với robot <span class="sp" style="flex:1"></span><label style="font-weight:500;font-size:12.5px"><input type="checkbox" id="ttsOn" ${UI.tts!==false?'checked':''}> Đọc thành tiếng</label></h5>
+      <div id="chatLog">${(UI.chat||[]).map(m=>`<div class="bub ${m.r}">${esc(m.t)}</div>`).join('')||'<div class="bub sys">Bấm ▶ Chạy, kết nối xiaozhi.me, rồi gõ câu hỏi ở đây. (Khung trang không dùng được micro thật nên em gõ chữ thay cho lời nói.)</div>'}</div>
+      <form id="chatForm"><input id="chatIn" placeholder="${SIM.listening?'Robot đang nghe… gõ câu của em':'Robot chưa nghe (cần chạy code)'}" ${SIM.listening?'':'disabled'} maxlength="300"><button class="btn pri" ${SIM.listening?'':'disabled'}>🎤 Nói</button></form></div>`;
+  }
+  el.innerHTML=h;
+  el.querySelectorAll('[data-pot]').forEach(r=>r.oninput=()=>{SIM.env.pot[r.dataset.pot]=+r.value; el.querySelector(`[data-potv="${r.dataset.pot}"]`).textContent=r.value; scheduleRender();});
+  const t=el.querySelector('#envT'); if(t) t.oninput=()=>{SIM.env.temp=+t.value; el.querySelector('#envTv').textContent=t.value+'°C'; scheduleRender();};
+  const hh=el.querySelector('#envH'); if(hh) hh.oninput=()=>{SIM.env.hum=+hh.value; el.querySelector('#envHv').textContent=hh.value+'%'; scheduleRender();};
+  el.querySelectorAll('[data-pbtn]').forEach(b=>{ const id=b.dataset.pbtn; b.onpointerdown=e=>{e.preventDefault(); setPressed(id,true);}; b.onpointerup=b.onpointerleave=b.onpointercancel=()=>setPressed(id,false); });
+  const tts=el.querySelector('#ttsOn'); if(tts) tts.onchange=()=>{UI.tts=tts.checked; if(!tts.checked) try{speechSynthesis.cancel();}catch(e){} };
+  const f=el.querySelector('#chatForm'); if(f) f.onsubmit=e=>{e.preventDefault(); const i=el.querySelector('#chatIn'); const v=i.value.trim(); if(!v||!SIM.listening) return; i.value=''; if(SIM.onHeard) SIM.onHeard(v); };
+  const log=el.querySelector('#chatLog'); if(log) log.scrollTop=log.scrollHeight;
+}
+function wifiText(){ const w=SIM.wifi; return w.state==='ok'?`✅ Đã kết nối “${w.ssid}”`:w.state==='connecting'?`⏳ Đang kết nối “${w.ssid}”…`:w.state==='fail'?`❌ Không kết nối được “${w.ssid}”`:'Chưa kết nối'; }
+function chatPush(r,t){ UI.chat=UI.chat||[]; UI.chat.push({r,t}); if(UI.chat.length>60) UI.chat.shift(); renderControls(); }
+function renderAll(){ renderSVG(); renderGuide(); renderStatus(); renderControls(); renderXZ(); updateModeChip(); }
+function updateModeChip(){ const pr=P(); $('#modeChip').textContent = (pr? `🧩 Dự án: ${pr.title}` : `🧪 Tự do`) + ` · ${B().short}` + (S.name?` · “${S.name}”`:''); }
+
+/* =========================================================
+   8. TRÌNH SOẠN CODE
+   ========================================================= */
+const ta=$('#code'), gut=$('#gutter');
+function syncGutter(){ const n=ta.value.split('\n').length; let s=''; for(let i=1;i<=n;i++) s+=i+'\n'; gut.textContent=s; gut.scrollTop=ta.scrollTop; }
+ta.addEventListener('input',()=>{ S.code=ta.value; syncGutter(); autosave(); });
+ta.addEventListener('scroll',()=>{ gut.scrollTop=ta.scrollTop; });
+ta.addEventListener('keydown',e=>{
+  if(e.key==='Tab'){ e.preventDefault(); const s=ta.selectionStart, en=ta.selectionEnd; ta.value=ta.value.slice(0,s)+'  '+ta.value.slice(en); ta.selectionStart=ta.selectionEnd=s+2; S.code=ta.value; syncGutter(); }
+  if(e.key==='Enter'){ e.preventDefault(); const s=ta.selectionStart; const line=ta.value.slice(0,s).split('\n').pop(); let ind=line.match(/^\s*/)[0]; if(/\{\s*$/.test(line)) ind+='  '; ta.value=ta.value.slice(0,s)+'\n'+ind+ta.value.slice(ta.selectionEnd); ta.selectionStart=ta.selectionEnd=s+1+ind.length; S.code=ta.value; syncGutter(); autosave(); }
+});
+function setCode(c){ S.code=c; ta.value=c; syncGutter(); }
+
+/* =========================================================
+   9. SERIAL MONITOR
+   ========================================================= */
+const sout=$('#serialOut'); let serLines=0;
+function serial(text,cls){
+  const parts=String(text).split('\n');
+  parts.forEach((p,i)=>{
+    let last=sout.lastElementChild;
+    if(!last || i>0 || cls || last.dataset.closed){ last=document.createElement('div'); if(cls) last.className=cls; sout.appendChild(last); serLines++; }
+    last.textContent+=p;
+  });
+  if(cls) sout.lastElementChild.dataset.closed='1';
+  while(serLines>600&&sout.firstElementChild){ sout.removeChild(sout.firstElementChild); serLines--; }
+  sout.scrollTop=sout.scrollHeight;
+}
+function sys(t,cls='sys'){ serial('[Mô phỏng] '+t,cls); }
+$('#bClear').onclick=()=>{ sout.innerHTML=''; serLines=0; };
+
+/* =========================================================
+   10. BỘ CHẠY CODE (Arduino → JavaScript)
+   ========================================================= */
+const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;
+class StopErr extends Error{}
+function transpile(src){
+  let s=src.replace(/\r/g,'');
+  s=s.replace(/^\s*#include.*$/gm,'');
+  s=s.replace(/^\s*#define\s+(\w+)\s+(.+?)\s*(\/\/.*)?$/gm,'const $1 = $2;');
+  s=s.replace(/\((?:unsigned\s+)?(?:int|long|float|double|byte)\)\s*/g,'');
+  const fns=[];
+  s=s.replace(/\b(?:void|int|long|float|double|bool|boolean|String|byte|unsigned\s+long|unsigned\s+int)\s+([A-Za-z_]\w*)\s*\(([^)]*)\)\s*\{/g,(m,name,params)=>{
+    fns.push(name); const pr=params.trim();
+    const ps=(pr===''||pr==='void')?'':pr.split(',').map(p=>p.trim().replace(/[&*]/g,' ').trim().split(/\s+/).pop()).join(', ');
+    return `async function ${name}(${ps}) {`;
+  });
+  s=s.replace(/^(\s*)(DHT|OLED|XiaoZhi)\s+([A-Za-z_]\w*)\s*(?:\(([^;]*)\))?\s*;/gm,(m,ind,cls,name,args)=>`${ind}let ${name} = new ${cls}(${args||''});`);
+  s=s.replace(/\b(?:static\s+)?(?:const\s+)?(?:unsigned\s+)?(?:int|long|float|double|bool|boolean|byte|char|String|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|size_t)\b\s*\*?\s*(?=[A-Za-z_]\w*\s*(?:=|;|,|\[))/g,'let ');
+  s=s.replace(/\.length\(\)/g,'.length');
+  fns.filter(f=>f!=='setup'&&f!=='loop').forEach(f=>{ s=s.replace(new RegExp(`(?<!function\\s)(?<!await\\s)\\b${f}\\s*\\(`,'g'),`await ${f}(`); });
+  s=s.replace(/\bdelay\s*\(/g,'await delay(');
+  s=s.replace(/\b([A-Za-z_]\w*)\.(begin|listen|ask|speak)\s*\(/g,'await $1.$2(');
+  // chèn điểm nghỉ vào vòng lặp
+  const re=/\b(while|for)\s*\(/g, ins=[]; let m;
+  while((m=re.exec(s))){ let i=m.index+m[0].length-1, d=0; for(;i<s.length;i++){ if(s[i]==='(')d++; else if(s[i]===')'){d--; if(d===0)break;} } let j=i+1; while(j<s.length&&/\s/.test(s[j]))j++; if(s[j]==='{') ins.push(j+1); }
+  for(let k=ins.length-1;k>=0;k--) s=s.slice(0,ins[k])+' await __y();'+s.slice(ins[k]);
+  return s;
+}
+function braceCheck(src){
+  const st=[]; const lines=src.split('\n'); const pairs={')':'(','}':'{',']':'['};
+  for(let li=0;li<lines.length;li++){ let L=lines[li]; let inS=null;
+    for(let i=0;i<L.length;i++){ const ch=L[i];
+      if(inS){ if(ch==='\\'){i++;continue;} if(ch===inS) inS=null; continue; }
+      if(ch==='"'||ch==="'"){ inS=ch; continue; }
+      if(ch==='/'&&L[i+1]==='/') break;
+      if('({['.includes(ch)) st.push({ch,li});
+      else if(')}]'.includes(ch)){ const t=st.pop(); if(!t||t.ch!==pairs[ch]) return `Dòng ${li+1}: thừa dấu “${ch}” hoặc thiếu dấu mở tương ứng.`; }
+    }
+  }
+  if(st.length){ const t=st.pop(); return `Dòng ${t.li+1}: dấu “${t.ch}” chưa được đóng.`; }
+  const lines2=src.split('\n'); for(let i=0;i<lines2.length;i++){ const l=lines2[i].replace(/\/\/.*$/,'').trim(); if(!l||l.startsWith('#')) continue; if(/^(if|else|for|while|switch|do)\b/.test(l)||/[{};,]$/.test(l)||/^[{}]/.test(l)||/\)\s*$/.test(l)&&/^(if|for|while|else)/.test(l)) continue; if(/[A-Za-z0-9_)\]"']$/.test(l)){ const nx=(lines2[i+1]||'').trim(); if(nx.startsWith('.')||nx.startsWith('+')||nx.startsWith('&&')||nx.startsWith('||')) continue; return `Dòng ${i+1}: có thể em quên dấu chấm phẩy “;” ở cuối dòng.`; } }
+  return null;
+}
+let RUN_ID=0; const waiters=new Set();
+function cancellable(fn){ return new Promise((res,rej)=>{ const w={rej}; waiters.add(w); fn(v=>{waiters.delete(w);res(v);},e=>{waiters.delete(w);rej(e);}); }); }
+function sleep(ms,id){ return cancellable((res,rej)=>{ if(id!==RUN_ID) return rej(new StopErr()); const t=setTimeout(()=>{ if(id!==RUN_ID) rej(new StopErr()); else res(); },Math.max(0,ms)); }); }
+function waitUntil(pred,id,ms=250){ return cancellable((res,rej)=>{ const tick=()=>{ if(id!==RUN_ID) return rej(new StopErr()); if(pred()) return res(); setTimeout(tick,ms); }; tick(); }); }
+function warnOnce(k,t,cls='warn'){ if(SIM.warned[k]) return; SIM.warned[k]=1; sys(t,cls); }
+
+function ledBrightness(c){
+  const a=gpioOf(c.id,'A'); const kG=hasNet(c.id,'K','GND');
+  if(hasNet(c.id,'A','3V3')||hasNet(c.id,'A','5V')) return kG?1:0;
+  if(a===null||!kG) return 0;
+  return (SIM.pwm[a]||0)/255;
+}
+function boardHasGpio(g){ return boardPins(S.board).some(p=>p.gpio===g) || g===B().info.led; }
+function makeApi(id){
+  const run=()=>{ if(id!==RUN_ID) throw new StopErr(); };
+  const pinCheck=(p,fn)=>{ if(typeof p!=='number'||!boardHasGpio(p)) warnOnce('nopin'+p,`${fn}(${p}): board ${B().short} không có chân GPIO${p}.`,'err'); };
+  const api={
+    HIGH:1,LOW:0,OUTPUT:'OUTPUT',INPUT:'INPUT',INPUT_PULLUP:'INPUT_PULLUP',DHT22:22,DHT11:11,WL_CONNECTED:3,WL_DISCONNECTED:6,WL_CONNECT_FAILED:4,
+    pinMode(p,m){ run(); pinCheck(p,'pinMode'); SIM.mode[p]=m; if(m==='OUTPUT'&&B().info.inputOnly.includes(p)) warnOnce('io'+p,`GPIO${p} chỉ đọc được, không thể đặt OUTPUT.`,'err'); },
+    digitalWrite(p,v){ run(); if(SIM.mode[p]!=='OUTPUT') warnOnce('dw'+p,`Em quên pinMode(${p}, OUTPUT) trong setup() rồi.`); SIM.out[p]=v?1:0; SIM.pwm[p]=v?255:0; scheduleRender(); },
+    analogWrite(p,v){ run(); v=Math.max(0,Math.min(255,Math.round(+v||0))); SIM.pwm[p]=v; SIM.out[p]=v>0?1:0; scheduleRender(); },
+    digitalRead(p){ run(); return readDigital(p); },
+    analogRead(p){ run(); return readAnalog(p); },
+    delay(ms){ return sleep(ms,id); },
+    millis(){ return Math.floor(performance.now()-SIM.t0); },
+    random(a,b){ if(b===undefined){b=a;a=0;} return a+Math.floor(Math.random()*(b-a)); },
+    map(x,a,b,c,d){ return Math.trunc((x-a)*(d-c)/(b-a)+c); },
+    constrain(x,a,b){ return Math.min(b,Math.max(a,x)); },
+    abs:Math.abs,min:Math.min,max:Math.max,sqrt:Math.sqrt,pow:Math.pow,round:Math.round,floor:Math.floor,ceil:Math.ceil,
+    String(v,d){ if(typeof v==='number'&&d!==undefined) return isNaN(v)?'nan':v.toFixed(d); if(typeof v==='number'&&isNaN(v)) return 'nan'; return globalThis.String(v===undefined?'':v); },
+    Serial:{ begin(){}, print(x){ run(); serial(typeof x==='number'&&isNaN(x)?'nan':String(x)); }, println(x=''){ run(); serial((typeof x==='number'&&isNaN(x)?'nan':String(x))+'\n'); } },
+    __y(){ return sleep(0,id); },
+    WiFi:makeWiFi(id), DHT:makeDHT(id), OLED:makeOLED(id), XiaoZhi:makeXZ(id)
+  };
+  return api;
+}
+function readDigital(p){
+  if(SIM.mode[p]==='OUTPUT') return SIM.out[p]||0;
+  const btn=S.comps.filter(c=>c.type==='button').find(c=>gpioOf(c.id,'P1')===p||gpioOf(c.id,'P2')===p);
+  const pull=SIM.mode[p]==='INPUT_PULLUP' && !B().info.inputOnly.includes(p);
+  if(btn){
+    const other = gpioOf(btn.id,'P1')===p ? 'P2':'P1';
+    const toGnd=hasNet(btn.id,other,'GND'), toPwr=hasNet(btn.id,other,'3V3');
+    if(SIM.pressed[btn.id]){ if(toGnd) return 0; if(toPwr) return 1; }
+    if(pull) return 1;
+    warnOnce('float'+p,`GPIO${p} đang bị “thả nổi”: hãy dùng pinMode(${p}, INPUT_PULLUP).`);
+    return Math.random()<.5?0:1;
+  }
+  if(!SIM.mode[p]) warnOnce('nomode'+p,`Em chưa khai báo pinMode cho chân ${p}.`);
+  return pull?1:0;
+}
+function readAnalog(p){
+  const I=B().info;
+  if(!I.adc1.includes(p)&&!I.adc2.includes(p)){ warnOnce('adc'+p,`GPIO${p} không có ADC nên analogRead luôn trả về 0.`,'err'); return 0; }
+  if(I.adc2.includes(p)&&SIM.wifi.state==='ok'){ warnOnce('adc2'+p,`GPIO${p} thuộc ADC2, không đọc được khi Wi-Fi đang bật.`,'err'); return 0; }
+  const pot=S.comps.filter(c=>c.type==='pot').find(c=>gpioOf(c.id,'OUT')===p);
+  if(pot){
+    const pw=hasNet(pot.id,'VCC','3V3')?1:hasNet(pot.id,'VCC','5V')?1:0, gn=hasNet(pot.id,'GND','GND');
+    if(!pw||!gn){ warnOnce('potpw','Biến trở chưa được cấp đủ nguồn (VCC và GND), giá trị đọc không đúng.'); return Math.floor(Math.random()*120); }
+    return Math.max(0,Math.min(4095,(SIM.env.pot[pot.id]??2048)+Math.floor(Math.random()*7-3)));
+  }
+  warnOnce('float_a'+p,`GPIO${p} chưa nối gì: giá trị analog chỉ là nhiễu.`);
+  return Math.floor(Math.random()*200);
+}
+function makeWiFi(id){
+  return {
+    begin(ssid,pass){ const w=SIM.wifi; w.ssid=String(ssid); w.state='connecting'; w.since=performance.now(); w.hinted=false; sys(`Wi-Fi: đang kết nối tới “${ssid}”…`); updWifi();
+      setTimeout(()=>{ if(id!==RUN_ID) return; const net=WIFI_NETS.find(n=>n.ssid===String(ssid));
+        if(!net){ w.state='fail'; sys(`Wi-Fi: không tìm thấy mạng “${ssid}”. Kiểm tra lại tên Wi-Fi (phân biệt chữ hoa, chữ thường).`,'err'); }
+        else if(net.band==='5 GHz'){ w.state='fail'; sys(`Wi-Fi: “${ssid}” là mạng 5 GHz, ESP32 chỉ bắt được 2.4 GHz! Hãy đổi sang mạng 2.4 GHz.`,'err'); }
+        else if(net.pass!==String(pass)){ w.state='fail'; sys('Wi-Fi: sai mật khẩu.','err'); }
+        else { w.state='ok'; sys(`Wi-Fi: đã kết nối “${ssid}”, IP 192.168.1.23`); }
+        updWifi(); },1600);
+    },
+    status(){ return SIM.wifi.state==='ok'?3:SIM.wifi.state==='fail'?4:6; },
+    localIP(){ return SIM.wifi.state==='ok'?'192.168.1.23':'0.0.0.0'; },
+    disconnect(){ SIM.wifi.state='off'; updWifi(); }
+  };
+}
+function updWifi(){ const e=$('#wifiSt'); if(e) e.textContent=wifiText(); if(P()&&P().steps.some(s=>s.special)) renderGuide(); }
+function makeDHT(id){
+  return class{ constructor(pin){ this.pin=pin; }
+    begin(){}
+    _ok(){ const c=S.comps.filter(c=>c.type==='dht22').find(c=>gpioOf(c.id,'DATA')===this.pin); if(!c){ warnOnce('dht'+this.pin,`Không tìm thấy DHT22 ở GPIO${this.pin}: kiểm tra dây DATA.`,'err'); return false; }
+      if(!(hasNet(c.id,'VCC','3V3')||hasNet(c.id,'VCC','5V'))||!hasNet(c.id,'GND','GND')){ warnOnce('dhtp','DHT22 chưa được cấp nguồn đầy đủ (VCC, GND).','err'); return false; } return true; }
+    readTemperature(){ if(id!==RUN_ID) throw new StopErr(); return this._ok()? Math.round((SIM.env.temp+ (Math.random()-.5)*0.4)*10)/10 : NaN; }
+    readHumidity(){ if(id!==RUN_ID) throw new StopErr(); return this._ok()? Math.round(SIM.env.hum+(Math.random()-.5)*2) : NaN; }
+  };
+}
+function makeOLED(id){
+  return class{ constructor(sda,scl){ this.sda=sda??B().info.i2c.sda; this.scl=scl??B().info.i2c.scl; this.size=1; this.comp=null; }
+    begin(){ const cs=S.comps.filter(c=>c.type==='oled');
+      const c=cs.find(c=>gpioOf(c.id,'SDA')===this.sda&&gpioOf(c.id,'SCL')===this.scl);
+      if(!c){ const sw=cs.find(c=>gpioOf(c.id,'SDA')===this.scl&&gpioOf(c.id,'SCL')===this.sda);
+        sys(sw?`OLED: dây SDA và SCL bị đảo! Code dùng SDA = ${this.sda}, SCL = ${this.scl}.`:`OLED: không tìm thấy màn hình ở SDA = ${this.sda}, SCL = ${this.scl}. Kiểm tra dây.`,'err'); return false; }
+      if(!(hasNet(c.id,'VCC','3V3')||hasNet(c.id,'VCC','5V'))||!hasNet(c.id,'GND','GND')){ sys('OLED: màn hình chưa được cấp nguồn (VCC, GND).','err'); return false; }
+      this.comp=c.id; SIM.oled[c.id]={on:true,lines:[]}; scheduleRender(); return true; }
+    _st(){ return this.comp? SIM.oled[this.comp] : null; }
+    clear(){ const s=this._st(); if(s){ s.lines=[]; scheduleRender(); } }
+    clearDisplay(){ this.clear(); }
+    setTextSize(n){ this.size=n>1?2:1; }
+    setCursor(){}
+    print(t){ const s=this._st(); if(!s) return; t=String(t); if(s.lines.length&&!s.lines[s.lines.length-1].done) s.lines[s.lines.length-1].t+=t; else s.lines.push({t,size:this.size}); scheduleRender(); }
+    println(t=''){ const s=this._st(); if(!s) return; this.print(t); s.lines[s.lines.length-1].done=true; if(s.lines.length>8) s.lines.shift(); }
+    display(){ scheduleRender(); }
+    _show(lines){ const s=this._st(); if(!s) return; s.lines=lines.map((l,i)=>({t:l,size:1,done:true})); scheduleRender(); }
+  };
+}
+/* --- Kiểm tra phần cứng âm thanh theo bo bread-compact-wifi --- */
+function pinsProblems(type,spec){
+  const c=S.comps.find(c=>c.type===type); const M=MODS[type];
+  if(!c) return [`Chưa có ${M.short} trong mạch.`];
+  const out=[];
+  for(const [pid,targets] of Object.entries(spec)){ if(!targets.some(t=>connOk(c.id,pid,t))) out.push(`${M.short}: chân ${M.pins.find(p=>p.id===pid).label} chưa nối ${targetLabel(targets[0])}.`); }
+  if(type==='mic'&&hasNet(c.id,'VDD','5V')) out.unshift('Micro bị cấp 5V! Ngoài đời thật micro có thể đã hỏng.');
+  return out;
+}
+function micProblems(){ if(S.board!=='esp32s3') return ['Thư viện XiaoZhi dùng board ESP32-S3.']; return pinsProblems('mic',{VDD:['3V3'],GND:['GND'],LR:['GND'],WS:['G4'],SCK:['G5'],SD:['G6']}); }
+function ampProblems(){ if(S.board!=='esp32s3') return ['Thư viện XiaoZhi dùng board ESP32-S3.']; const a=pinsProblems('amp',{VIN:['5V','3V3'],GND:['GND'],DIN:['G7'],BCLK:['G15'],LRC:['G16']}); const s=pinsProblems('speaker',{P:['@amp.SPKP','@amp.SPKN'],N:['@amp.SPKN','@amp.SPKP']}); return a.concat(s); }
+
+/* =========================================================
+   11. MÔ PHỎNG XIAOZHI AI
+   ========================================================= */
+let sampleFn=null, dlFn=null, dbRef=null, uid=null;
+function cap(name){ try{ if(window.claude&&typeof window.claude.use==='function') return Promise.resolve(window.claude.use(name)).catch(()=>null); }catch(e){} return Promise.resolve(null); }
+function makeXZ(id){
+  return class{
+    constructor(oled){ this.oled=oled||null; this.ready=false; this.hist=[]; }
+    async begin(){
+      if(id!==RUN_ID) throw new StopErr();
+      sys('XiaoZhi: khởi động robot…');
+      const mp=micProblems(), ap=ampProblems();
+      if(mp.length||ap.length){ sys('Kiểm tra phần cứng: phát hiện lỗi đấu nối','err'); [...mp,...ap].forEach(t=>sys('  • '+t,'warn')); }
+      else sys('Kiểm tra phần cứng: micro ✓  ampli ✓  loa ✓');
+      if(SIM.wifi.state!=='ok'){ sys('XiaoZhi: chưa có Wi-Fi nên không kết nối được xiaozhi.me. Hãy gọi WiFi.begin() và chờ kết nối trước robot.begin().','err'); return false; }
+      if(this.oled) this.oled._show(['Dang ket noi','xiaozhi.me ...']);
+      sys('XiaoZhi: đang kết nối máy chủ xiaozhi.me…'); await sleep(900,id);
+      if(!S.xz.paired){
+        const code=String(Math.floor(100000+Math.random()*900000)); SIM.pendingCode=code;
+        if(this.oled) this.oled._show(['KICH HOAT','Ma: '+code,'Vao xiaozhi.me','them thiet bi']);
+        serial('Ma kich hoat: '+code+'\n');
+        sys(`Mã kích hoạt ${code} (hiện trên OLED). Mở tab “xiaozhi.me” → Thêm thiết bị → nhập mã.`);
+        toast(`🔑 Robot hiện mã kích hoạt <b>${code}</b>. Mở tab xiaozhi.me để ghép nối.`,'info',true);
+        renderXZ(); renderGuide();
+        await waitUntil(()=>S.xz.paired,id,300);
+        SIM.pendingCode=null; sys('XiaoZhi: ghép nối thành công! 🎉');
+      }
+      SIM.xzOnline=true; this.ready=true; $('#xzDot').classList.add('on'); renderXZ(); renderGuide();
+      if(this.oled) this.oled._show(['Xin chao!','Toi la '+viNoMark(S.xz.persona.name),'San sang tro chuyen']);
+      sys(`XiaoZhi: ${S.xz.persona.name} đã trực tuyến. Gõ câu hỏi trong khung “Trò chuyện với robot”.`);
+      if(P()&&stepStatus().every(s=>s.done)) toast('🏆 Hoàn thành robot trợ lý giọng nói! Hãy thử hỏi robot một câu.','ok');
+      return true;
+    }
+    async listen(){
+      if(id!==RUN_ID) throw new StopErr();
+      if(!this.ready){ await sleep(1000,id); warnOnce('xzready','robot.listen(): robot chưa kết nối xiaozhi.me (robot.begin() chưa thành công).','err'); return ''; }
+      SIM.listening=true; renderControls(); scheduleRender(); if(this.oled) this.oled._show(['Dang nghe...']);
+      let heard;
+      try{ heard=await cancellable((res,rej)=>{ SIM.onHeard=v=>{SIM.onHeard=null;res(v);}; const chk=()=>{ if(id!==RUN_ID){SIM.onHeard=null; rej(new StopErr());} else setTimeout(chk,300);}; chk(); }); }
+      finally{ SIM.listening=false; renderControls(); scheduleRender(); }
+      chatPush('me',heard);
+      const mp=micProblems();
+      if(mp.length){ sys('Micro không thu được âm thanh: '+mp[0],'err'); chatPush('sys','(Robot không nghe thấy gì: kiểm tra dây micro)'); toast('🎤 Robot không nghe thấy! '+mp[0],'warn'); return ''; }
+      if(this.oled) this.oled._show(['Ban:',...wrap(viNoMark(heard),21).slice(0,3)]);
+      return heard;
+    }
+    async ask(text){
+      if(id!==RUN_ID) throw new StopErr();
+      if(!text) return '';
+      if(SIM.wifi.state!=='ok'){ sys('Mất Wi-Fi, không gửi được câu hỏi.','err'); return 'Minh bi mat ket noi mang roi.'; }
+      if(this.oled) this.oled._show(['Dang suy nghi...']);
+      this.hist.push({role:'user',content:text});
+      const ans=await llmReply(this.hist);
+      if(id!==RUN_ID) throw new StopErr();
+      this.hist.push({role:'assistant',content:ans}); if(this.hist.length>16) this.hist.splice(0,2);
+      return ans;
+    }
+    async speak(text){
+      if(id!==RUN_ID) throw new StopErr();
+      if(!text) return;
+      if(this.oled) this.oled._show(wrap(viNoMark(text),21).slice(0,5));
+      const ap=ampProblems();
+      chatPush('bot',text+(ap.length?'  🔇':''));
+      if(ap.length){ sys('Loa im lặng: '+ap[0],'err'); toast('🔇 Loa không kêu! '+ap[0],'warn'); await sleep(800,id); return; }
+      SIM.speaking=true; scheduleRender();
+      try{ await speakTTS(text,id); } finally { SIM.speaking=false; scheduleRender(); }
+    }
+  };
+}
+function wrap(t,n){ const words=String(t).split(/\s+/), out=[]; let line=''; words.forEach(w=>{ if((line+' '+w).trim().length>n){ if(line) out.push(line); line=w; } else line=(line+' '+w).trim(); }); if(line) out.push(line); return out; }
+function viNoMark(s){ return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D'); }
+function speakTTS(text,id){
+  return new Promise(res=>{
+    const fallback=()=>setTimeout(res,Math.min(9000,800+text.length*55));
+    if(UI.tts===false||!('speechSynthesis' in window)) return fallback();
+    try{
+      const u=new SpeechSynthesisUtterance(text); u.lang='vi-VN'; u.rate=1.05;
+      const v=speechSynthesis.getVoices().find(v=>/^vi/i.test(v.lang)); if(v) u.voice=v;
+      let done=false; const fin=()=>{ if(!done){done=true;res();} };
+      u.onend=fin; u.onerror=fin; setTimeout(fin,Math.min(20000,2000+text.length*90));
+      const iv=setInterval(()=>{ if(id!==RUN_ID){ try{speechSynthesis.cancel();}catch(e){} clearInterval(iv); fin(); } if(done) clearInterval(iv); },300);
+      speechSynthesis.speak(u);
+    }catch(e){ fallback(); }
+  });
+}
+async function llmReply(hist){
+  const per=S.xz.persona;
+  if(!sampleFn) sampleFn=await cap('sample');
+  if(sampleFn){
+    const sysTxt=`[Hướng dẫn cho trợ lý] Bạn là "${per.name}", một robot trợ lý giọng nói mini chạy trên ESP32-S3 mà một học sinh tự lắp ráp (dự án mã nguồn mở XiaoZhi AI). Tính cách: ${per.style}. Luôn trả lời bằng tiếng Việt, tối đa 3 câu ngắn, dễ hiểu với học sinh. Không dùng emoji, markdown, gạch đầu dòng hay ký hiệu đặc biệt vì câu trả lời sẽ được đọc thành tiếng qua loa. Nội dung an toàn, phù hợp lứa tuổi học sinh; nếu câu hỏi không phù hợp thì nhẹ nhàng từ chối và gợi ý chủ đề khác.`;
+    const msgs=hist.slice(-12).map((m,i)=>({role:m.role,content:m.content}));
+    while(msgs.length&&msgs[0].role!=='user') msgs.shift();
+    if(msgs.length) msgs[0]={role:'user',content:sysTxt+'\n\n[Học sinh nói] '+msgs[0].content};
+    try{ const r=await sampleFn(msgs,{modelTier:'quick',cache:false}); const t=(r&&r.text||'').replace(/[*#_`>]/g,'').trim(); if(t) return t; }
+    catch(e){ if(e&&e.code==='rate_limited') sys('Máy chủ AI đang bận, thử lại sau ít giây.','warn'); else if(e&&e.code==='not_granted'){ sampleFn=null; } }
+  }
+  return cannedReply(hist[hist.length-1].content);
+}
+function cannedReply(q){
+  const t=viNoMark(q.toLowerCase()), n=S.xz.persona.name;
+  if(/xin chao|chao|hello|hi\b/.test(t)) return `Chào bạn! Mình là ${n}. Bạn muốn hỏi mình điều gì nào?`;
+  if(/ten.*gi|la ai/.test(t)) return `Mình là ${n}, robot trợ lý được lắp từ ESP32-S3, micro và loa.`;
+  if(/may gio|gio/.test(t)){ const d=new Date(); return `Bây giờ là ${d.getHours()} giờ ${d.getMinutes()} phút.`; }
+  const m=t.match(/(-?\d+(?:\.\d+)?)\s*([+\-x*:\/])\s*(-?\d+(?:\.\d+)?)/);
+  if(m){ const a=+m[1],b=+m[3],o=m[2]; const r=o==='+'?a+b:o==='-'?a-b:(o==='x'||o==='*')?a*b:b!==0?a/b:NaN; return isNaN(r)?'Phép chia cho 0 không có kết quả đâu nhé.':`Kết quả là ${Math.round(r*1000)/1000}.`; }
+  if(/esp32/.test(t)) return 'ESP32 là vi điều khiển có Wi-Fi và Bluetooth của hãng Espressif. Mình đang chạy trên con chip ESP32-S3 đó!';
+  return `Mình nghe bạn nói: “${q}”. Hiện mình chưa kết nối được tới mô hình AI nên chỉ trả lời được vài câu đơn giản.`;
+}
+
+/* --- Tab xiaozhi.me (mô phỏng) --- */
+function renderXZ(){
+  const el=$('#tab-xz'), X=S.xz;
+  let h=`<div class="xz-top"><span class="xz-logo">🤖 xiao<b>zhi</b>.me</span><span style="color:#6b7280">Bảng điều khiển</span><span style="flex:1"></span>${X.loggedIn?`<span style="font-weight:600">👤 ${esc(X.user)}</span><button class="btn" id="xzOut">Đăng xuất</button>`:''}</div><div class="xz-wrap">`;
+  h+=`<div class="xz-note">🧪 Đây là <b>bản mô phỏng</b> để luyện tập, không kết nối với máy chủ thật. Trang thật: <a href="https://xiaozhi.me" target="_blank" rel="noopener">xiaozhi.me</a>. Trong mô phỏng, câu trả lời của robot do Claude tạo ra thay cho mô hình Qwen/DeepSeek.</div>`;
+  if(!X.loggedIn){
+    h+=`<div class="xz-card"><h3>Đăng nhập</h3><p style="margin:0 0 8px;color:#475569">Trên trang thật em đăng nhập bằng số điện thoại hoặc tài khoản Google. Ở đây chỉ cần nhập tên.</p><div class="xz-row"><input class="xz-in" id="xzName" placeholder="Tên của em" maxlength="40"><button class="btn pri" id="xzIn">Đăng nhập</button></div></div>`;
+  } else {
+    h+=`<div class="xz-card"><h3>Thiết bị của em</h3>`;
+    if(X.paired&&X.device){
+      h+=`<div class="dev"><span style="font-size:26px">🤖</span><div style="flex:1"><b>${esc(X.device.name)}</b><div style="font-size:12px;color:#64748b">MAC ${esc(X.device.mac)} · ghép nối lúc ${esc(X.device.at)}</div></div><span class="st ${SIM.xzOnline?'on':'off'}">${SIM.xzOnline?'Trực tuyến':'Ngoại tuyến'}</span><button class="btn" id="xzUnpair">Gỡ thiết bị</button></div>`;
+    } else {
+      h+=`<p style="margin:0 0 8px;color:#475569">Chưa có thiết bị. Chạy code để robot hiện <b>mã kích hoạt 6 số</b> trên màn OLED, rồi nhập vào đây.</p>
+      <div class="xz-row"><input class="xz-in codein" id="xzCode" inputmode="numeric" maxlength="6" placeholder="000000"><button class="btn pri" id="xzAdd">+ Thêm thiết bị</button></div>
+      <div class="xz-msg ${SIM.pendingCode?'ok':''}" id="xzMsg">${SIM.pendingCode?'📟 Có một robot đang chờ ghép nối, nhìn mã trên màn OLED nhé!':'Chưa có robot nào đang chờ ghép nối.'}</div>`;
+    }
+    h+=`</div>`;
+    if(X.paired){
+      const p=X.persona;
+      h+=`<div class="xz-card"><h3>Cấu hình vai trò cho robot</h3>
+      <div class="xz-row"><label>Tên robot</label><input class="xz-in" id="pName" value="${esc(p.name)}" maxlength="30"></div>
+      <div class="xz-row"><label>Tính cách</label><select class="xz-in" id="pStyle">${['vui vẻ, thân thiện, hay khen ngợi','như một thầy giáo kiên nhẫn, giải thích từng bước','hài hước, thích kể chuyện cười','ngắn gọn, đi thẳng vào vấn đề','nói chuyện như một nhà khoa học nhí'].map(s=>`<option ${s===p.style?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="xz-row"><label>Mô hình AI</label><select class="xz-in" id="pModel">${['Qwen (mô phỏng)','DeepSeek (mô phỏng)','Doubao (mô phỏng)'].map(s=>`<option ${s===p.model?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="xz-row"><label></label><button class="btn pri" id="pSave">Lưu cấu hình</button><span class="xz-msg" id="pMsg"></span></div></div>`;
+    }
+  }
+  h+=`<div class="xz-card"><h3>Các bước ghép nối</h3><ol style="margin:0;padding-left:20px;color:#334155;line-height:1.7"><li>Ráp đủ micro, ampli, loa, màn OLED.</li><li>Sửa tên/mật khẩu Wi-Fi trong code (dùng mạng 2.4 GHz), bấm ▶ Chạy.</li><li>Đọc mã 6 số trên màn OLED (hoặc Serial Monitor).</li><li>Đăng nhập trang này → nhập mã → Thêm thiết bị.</li><li>Quay lại tab Mạch, gõ câu hỏi để trò chuyện với robot.</li></ol></div></div>`;
+  el.innerHTML=h;
+  const q=s=>el.querySelector(s);
+  if(q('#xzIn')) q('#xzIn').onclick=()=>{ const n=q('#xzName').value.trim(); if(!n){ q('#xzName').focus(); return; } X.loggedIn=true; X.user=n; autosave(); renderXZ(); };
+  if(q('#xzOut')) q('#xzOut').onclick=()=>{ X.loggedIn=false; autosave(); renderXZ(); };
+  if(q('#xzAdd')) q('#xzAdd').onclick=()=>{
+    const v=q('#xzCode').value.trim(), m=q('#xzMsg');
+    if(!/^\d{6}$/.test(v)){ m.className='xz-msg err'; m.textContent='Mã kích hoạt gồm đúng 6 chữ số.'; return; }
+    if(!SIM.pendingCode){ m.className='xz-msg err'; m.textContent='Chưa có robot nào đang chờ. Hãy bấm ▶ Chạy code trước để robot hiện mã.'; return; }
+    if(v!==SIM.pendingCode){ m.className='xz-msg err'; m.textContent='Mã không đúng. Nhìn lại màn OLED nhé!'; return; }
+    X.paired=true; X.device={name:'ESP32-S3 Bread Compact Wi-Fi',mac:'7c:df:a1:'+Array.from({length:3},()=>Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join(':'),at:new Date().toLocaleString('vi-VN')};
+    autosave(); renderXZ(); toast('✅ Đã thêm thiết bị! Robot sẽ trực tuyến sau vài giây.','ok');
+  };
+  if(q('#xzUnpair')) q('#xzUnpair').onclick=()=>{ X.paired=false; X.device=null; SIM.xzOnline=false; $('#xzDot').classList.remove('on'); autosave(); renderXZ(); renderGuide(); toast('Đã gỡ thiết bị. Chạy lại code để ghép nối lại.','info'); };
+  if(q('#pSave')) q('#pSave').onclick=()=>{ X.persona={name:q('#pName').value.trim()||'Tiểu Trí',style:q('#pStyle').value,model:q('#pModel').value}; autosave(); q('#pMsg').className='xz-msg ok'; q('#pMsg').textContent='Đã lưu. Robot sẽ dùng cấu hình mới từ câu tiếp theo.'; };
+}
+
+/* =========================================================
+   12. CHẠY / DỪNG
+   ========================================================= */
+async function runCode(){
+  stopCode(true);
+  const err=braceCheck(S.code);
+  if(err){ serial('❌ Lỗi biên dịch: '+err+'\n','err'); toast('❌ Code có lỗi: '+err,'err'); return; }
+  const js=transpile(S.code);
+  const id=++RUN_ID; SIM.running=true; SIM.out={}; SIM.pwm={}; SIM.mode={}; SIM.warned={}; SIM.t0=performance.now(); SIM.oled={}; SIM.wifi={state:'off',ssid:null}; SIM.xzOnline=false; SIM.listening=false; SIM.speaking=false; SIM.pendingCode=null;
+  $('#xzDot').classList.remove('on');
+  setRunUI(true);
+  const pr=P(); if(pr){ const st=stepStatus(); const notWired=st.some((s,i)=>!s.done&&!pr.steps[i].special); if(notWired) sys('Mạch chưa ráp xong, một số linh kiện sẽ không hoạt động.','warn'); }
+  sys('Nạp code thành công. Đang chạy…');
+  const api=makeApi(id); const names=Object.keys(api);
+  let fn;
+  try{ fn=new AsyncFunction(...names, js+'\n;return {setup:(typeof setup==="function")?setup:null, loop:(typeof loop==="function")?loop:null};'); }
+  catch(e){ SIM.running=false; setRunUI(false); serial('❌ Lỗi cú pháp: '+friendlyErr(e)+'\n','err'); toast('❌ Code có lỗi cú pháp. Xem Serial Monitor.','err'); return; }
+  try{
+    const r=await fn(...names.map(n=>api[n]));
+    if(!r.setup) sys('Không tìm thấy hàm setup().','err');
+    if(r.setup) await r.setup();
+    if(!r.loop){ sys('Không tìm thấy hàm loop().','warn'); }
+    while(id===RUN_ID && r.loop){ await r.loop(); await sleep(0,id); }
+  }catch(e){
+    if(!(e instanceof StopErr)){ serial('❌ Lỗi khi chạy: '+friendlyErr(e)+'\n','err'); toast('❌ Chương trình bị lỗi. Xem Serial Monitor.','err'); }
+  }finally{ if(id===RUN_ID){ SIM.running=false; setRunUI(false); } }
+}
+function friendlyErr(e){
+  const m=String(e&&e.message||e);
+  let x=m.match(/(\w+) is not defined/); if(x) return `“${x[1]}” chưa được khai báo (hoặc mô phỏng chưa hỗ trợ). Kiểm tra lại tên biến, tên hàm, chữ hoa/thường.`;
+  x=m.match(/(\w+) is not a function/); if(x) return `“${x[1]}” không phải là hàm mà mô phỏng hỗ trợ.`;
+  if(/Unexpected token|Unexpected identifier|missing/.test(m)) return 'Có câu lệnh viết sai cú pháp (thiếu dấu ; hoặc ngoặc). Chi tiết: '+m;
+  return m;
+}
+function stopCode(silent){
+  RUN_ID++; waiters.forEach(w=>{ try{w.rej(new StopErr());}catch(e){} }); waiters.clear();
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const was=SIM.running;
+  SIM.running=false; SIM.listening=false; SIM.speaking=false; SIM.xzOnline=false; SIM.onHeard=null; SIM.pendingCode=null; SIM.pwm={}; SIM.out={}; SIM.oled={}; SIM.wifi={state:'off',ssid:null};
+  $('#xzDot').classList.remove('on');
+  if(was&&!silent) sys('Đã dừng chương trình.');
+  setRunUI(false);
+}
+function setRunUI(on){ $('#bRun').disabled=false; $('#bRun').textContent=on?'↻ Chạy lại':'▶ Chạy'; $('#bStop').disabled=!on; const r=$('#runState'); r.textContent=on?'● Đang chạy':'● Đang dừng'; r.classList.toggle('on',on); renderAll(); }
+$('#bRun').onclick=()=>{ runCode(); if(innerWidth<900) setMob('circ'); };
+$('#bStop').onclick=()=>stopCode(false);
+$('#bSample').onclick=()=>confirmBox('Khôi phục code mẫu?','Code hiện tại trong ô soạn thảo sẽ bị thay bằng code mẫu của bài này.','Khôi phục',()=>{ setCode(P()?CODE[P().code]:CODE.free); autosave(); });
+
+/* =========================================================
+   13. HỘP THOẠI: CHÀO MỪNG, THƯ VIỆN, DỰ ÁN
+   ========================================================= */
+function openModal(html){ $('#mBody').innerHTML=html; $('#modal').hidden=false; $('#mBody').scrollTop=0; }
+function closeModal(){ $('#modal').hidden=true; }
+$('#mClose').onclick=closeModal;
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+function confirmBox(title,msg,ok,fn){
+  openModal(`<h2>${esc(title)}</h2><p class="sub">${esc(msg)}</p><div class="row"><button class="btn pri" id="cOk">${esc(ok)}</button><button class="btn" id="cNo">Hủy</button></div>`);
+  $('#cOk').onclick=()=>{ closeModal(); fn(); }; $('#cNo').onclick=closeModal;
+}
+function openWelcome(){
+  const has=!!loadLocal('esp32lab.autosave');
+  openModal(`<h2>👋 Chào mừng đến Phòng Lab ESP32!</h2><p class="sub">Học lập trình ESP32 bằng mô phỏng, không cần mua linh kiện. Hôm nay em muốn làm gì?</p>
+  <div class="big2"><button class="card" id="wLib"><span class="ic">📘</span><b>Khám phá mạch</b><small>Chọn một board (ví dụ ESP32) để xem sơ đồ chân, cách dùng và các module có thể kết hợp. Sau đó tự do nối dây.</small></button>
+  <button class="card" id="wProj"><span class="ic">🧩</span><b>Làm dự án theo hướng dẫn</b><small>Ráp mạch từng bước có gợi ý: nháy LED, nút nhấn, trạm thời tiết, robot chatbot XiaoZhi AI…</small></button></div>
+  <div class="row" style="margin-top:14px">${has?'<button class="btn pri" id="wCont">▶ Tiếp tục bài đang làm dở</button>':''}<button class="btn" id="wOpen">📂 Mở bài đã lưu</button><button class="btn" id="wImp">⬆ Nhập file bài làm</button></div>`);
+  $('#wLib').onclick=()=>openLibrary(); $('#wProj').onclick=openProjects; $('#wOpen').onclick=openSaves; $('#wImp').onclick=openImport;
+  if(has) $('#wCont').onclick=()=>{ const st=loadLocal('esp32lab.autosave'); if(st) applyState(st); closeModal(); };
+}
+function openProjects(){
+  const lvl={Dễ:'#15803d',Vừa:'#c2410c',Khó:'#b91c1c'};
+  openModal(`<h2>🧩 Chọn dự án</h2><p class="sub">Mỗi dự án có hướng dẫn ráp từng bước, gợi ý khi gặp khó và cảnh báo khi nối sai.</p>
+  <div class="cards">${Object.entries(PROJECTS).map(([k,p])=>`<button class="card" data-proj="${k}"><span class="ic">${p.ic}</span><b>${esc(p.title)}</b><small>${esc(p.desc)}</small><span class="tag" style="background:#fff;color:${lvl[p.level]};border:1px solid ${lvl[p.level]}">${p.level} · ${BOARDS[p.board].short}</span></button>`).join('')}</div>`);
+  document.querySelectorAll('[data-proj]').forEach(b=>b.onclick=()=>startProject(b.dataset.proj));
+}
+function startProject(k){
+  const go=()=>{ stopCode(true); S=freshState(PROJECTS[k].board,k); keepXz(); UI.hintLv={}; UI.chat=[]; UI.pending=null; UI.selWire=null; UI.selComp=null; setCode(S.code); closeModal(); renderAll(); autosave(); sys(`Bắt đầu dự án “${PROJECTS[k].title}”. Làm theo hướng dẫn phía trên mạch nhé!`); setTab('circuit'); };
+  if(S && S.wires.length) confirmBox('Bắt đầu dự án mới?','Bài đang làm sẽ được thay thế. Nếu muốn giữ lại, hãy bấm 💾 Lưu trước.','Bắt đầu',go); else go();
+}
+let lastXz=null; function keepXz(){ if(lastXz) S.xz=JSON.parse(JSON.stringify(lastXz)); }
+function openLibrary(boardId,tab){
+  tab=tab||'board';
+  const tabs=`<div class="lib-tabs"><button data-lt="board" class="${tab==='board'?'on':''}">🟦 Board</button><button data-lt="mod" class="${tab==='mod'?'on':''}">🧱 Module / linh kiện</button></div>`;
+  if(boardId){ openModal(boardDetail(boardId)); bindLib(); return; }
+  const list = tab==='board'
+    ? Object.entries(BOARDS).map(([k,b])=>`<button class="card" data-board="${k}"><span class="ic">${b.ic}</span><b>${esc(b.name)}</b><small>${esc(b.desc)}</small><span class="tag">${b.chip}</span></button>`).join('')
+    : Object.entries(MODS).map(([k,m])=>`<button class="card" data-mod="${k}"><span class="ic">${m.ic}</span><b>${esc(m.name)}</b><small>${esc(m.desc)}</small><span class="tag">${esc(m.volt)}</span></button>`).join('');
+  openModal(`<h2>📘 Thư viện mạch</h2><p class="sub">Chọn một board hoặc module để xem sơ đồ chân, cách sử dụng và các mạch có thể kết hợp.</p>${tabs}<div class="cards">${list}</div>`);
+  bindLib();
+}
+function bindLib(){
+  document.querySelectorAll('[data-lt]').forEach(b=>b.onclick=()=>openLibrary(null,b.dataset.lt));
+  document.querySelectorAll('[data-board]').forEach(b=>b.onclick=()=>{ openModal(boardDetail(b.dataset.board)); bindLib(); });
+  document.querySelectorAll('[data-mod]').forEach(b=>b.onclick=()=>{ openModal(modDetail(b.dataset.mod)); bindLib(); });
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addComp(b.dataset.add));
+  document.querySelectorAll('[data-useboard]').forEach(b=>b.onclick=()=>useBoard(b.dataset.useboard));
+  document.querySelectorAll('[data-proj]').forEach(b=>b.onclick=()=>startProject(b.dataset.proj));
+  document.querySelectorAll('[data-sample]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sample; confirmBox('Chèn code mẫu?','Code trong ô soạn thảo sẽ được thay bằng code mẫu của module này.','Chèn code',()=>{ setCode(CODE[k]); autosave(); toast('Đã chèn code mẫu.','ok'); }); });
+  const back=$('#libBack'); if(back) back.onclick=()=>openLibrary(null,back.dataset.tab);
+}
+function miniBoardSVG(bid){
+  const b=BOARDS[bid], pins=boardPins(bid), n=Math.max(b.left.length,b.right.length), pitch=20, w=150, h=n*pitch+60, ox=70, oy=10;
+  let s=`<svg viewBox="0 0 290 ${h+20}" style="width:100%;max-width:300px;display:block" role="img" aria-label="Sơ đồ chân ${esc(b.name)}"><rect x="${ox}" y="${oy}" width="${w}" height="${h}" rx="10" fill="#18243b"/><rect x="${ox+40}" y="${oy+6}" width="${w-80}" height="22" rx="3" fill="#c7ccd4"/><text x="${ox+w/2}" y="${oy+21}" text-anchor="middle" font-size="10" font-weight="700" fill="#334155">${b.short}</text>`;
+  pins.forEach(p=>{ const y=oy+36+p.idx*pitch+pitch/2, x=p.side==='L'?ox:ox+w, k=pinKind(b,p);
+    s+=`<circle cx="${x}" cy="${y}" r="5" fill="${KIND_COLOR[k]}" stroke="#fff" stroke-width="1.2"/><text x="${p.side==='L'?x-9:x+9}" y="${y+3.5}" text-anchor="${p.side==='L'?'end':'start'}" font-size="10" font-weight="600" fill="#1c2433">${esc(p.label)}</text>`; });
+  return s+'</svg>';
+}
+function boardDetail(bid){
+  const b=BOARDS[bid], I=b.info;
+  const rows=[['Nguồn','3V3, 5V (VIN), GND','Cấp điện cho linh kiện. Không nối nguồn vào GND!'],
+    ['Đọc analog (ADC1)',I.adc1.join(', '),'Dùng cho biến trở, cảm biến analog. Hoạt động cả khi bật Wi-Fi.'],
+    ['ADC2',I.adc2.join(', '),'Không đọc analog được khi đang dùng Wi-Fi.'],
+    I.inputOnly.length?['Chỉ đọc (input-only)',I.inputOnly.join(', '),'Không xuất tín hiệu, không có điện trở kéo lên.']:null,
+    ['Strapping (cẩn thận)',I.strap.join(', '),'Ảnh hưởng chế độ khởi động; nối sai có thể không nạp được code.'],
+    ['Serial / USB',[...I.uart,...I.usb].join(', '),'Dùng để nạp code và Serial Monitor.'],
+    ['Không được dùng',I.forbid.join(', '),'Nối với bộ nhớ Flash/PSRAM bên trong chip.'],
+    ['I²C mặc định',`SDA ${I.i2c.sda}, SCL ${I.i2c.scl}`,'Cho màn OLED, cảm biến I²C.'],
+    ['LED trên board',`GPIO${I.led}`,'Thử nháy LED không cần linh kiện.']].filter(Boolean);
+  return `<button class="btn" id="libBack" data-tab="board">← Thư viện</button><h2 style="margin-top:10px">${b.ic} ${esc(b.name)}</h2><p class="sub">${esc(b.desc)}</p>
+  <div class="detail"><div>${miniBoardSVG(bid)}<div style="display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;margin-top:8px">${[['pwr','Nguồn'],['gnd','GND'],['io','GPIO'],['strap','Strapping'],['inonly','Chỉ đọc'],['uart','Serial/USB'],['forbid','Không dùng']].map(([k,t])=>`<span class="lg"><i style="background:${KIND_COLOR[k]}"></i>${t}</span>`).join('')}</div></div>
+  <div><h3>📌 Sơ đồ chân cần nhớ</h3><table class="pt"><tr><th>Nhóm chân</th><th>Chân</th><th>Ghi chú</th></tr>${rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</table>
+  <h3>🛠 Cách sử dụng</h3><ul>${b.usage.map(u=>`<li>${esc(u)}</li>`).join('')}</ul>
+  <h3>🧱 Các mạch phổ biến có thể kết hợp</h3><div class="chips">${b.combos.map(m=>`<button class="chip" data-mod="${m}">${MODS[m].ic} ${esc(MODS[m].short)}</button>`).join('')}</div>
+  <h3>🧩 Dự án dùng board này</h3><div class="chips">${b.projects.map(p=>`<button class="chip" data-proj="${p}">${PROJECTS[p].ic} ${esc(PROJECTS[p].title)}</button>`).join('')}</div>
+  <div class="row" style="margin-top:16px"><button class="btn pri" data-useboard="${bid}">🧪 Dùng board này để thực hành tự do</button></div></div></div>`;
+}
+function modDetail(k){
+  const m=MODS[k];
+  const needTxt={gnd:'GND','3v3':'3V3','3v3only':'3V3 (không dùng 5V!)',pwr:'3V3 hoặc 5V',out:'Chân GPIO (xuất tín hiệu)',in:'Chân GPIO (đọc tín hiệu)',io:'Chân GPIO',adc:'Chân có ADC (ESP32: 32–39)',spk:'Loa',amp:'Chân Loa ± của ampli'};
+  const okBoards=Object.entries(BOARDS).filter(([bk,b])=>b.combos.includes(k)).map(([bk,b])=>b.short).join(', ');
+  return `<button class="btn" id="libBack" data-tab="mod">← Thư viện</button><h2 style="margin-top:10px">${m.ic} ${esc(m.name)}</h2><p class="sub">${esc(m.desc)}</p>
+  <div class="detail" style="grid-template-columns:1fr 1fr"><div><h3>🔌 Sơ đồ chân & cách nối</h3><table class="pt"><tr><th>Chân module</th><th>Nối vào</th></tr>${m.pins.map(p=>`<tr><td><b>${esc(p.label)}</b></td><td>${needTxt[p.need]}</td></tr>`).join('')}</table>
+  <p style="font-size:13px;color:var(--muted)">⚡ Điện áp: ${esc(m.volt)}<br>🟦 Dùng tốt với: ${esc(okBoards||'mọi board')}</p>
+  <h3>🛠 Cách sử dụng</h3><ul>${m.usage.map(u=>`<li>${esc(u)}</li>`).join('')}</ul></div>
+  <div><h3>💻 Code mẫu</h3><pre class="sample">${esc(CODE[m.sample])}</pre>
+  <div class="row"><button class="btn pri" data-add="${k}">+ Thêm vào mạch</button><button class="btn" data-sample="${m.sample}">Chèn code mẫu vào editor</button></div></div></div>`;
+}
+function useBoard(bid){
+  const go=()=>{ stopCode(true); S=freshState(bid,null); keepXz(); setCode(CODE.free); UI.chat=[]; closeModal(); renderAll(); autosave(); sys(`Chế độ tự do với ${BOARDS[bid].name}. Thêm linh kiện từ 📘 Thư viện mạch.`); setTab('circuit'); };
+  if(S && (S.wires.length||S.comps.length)) confirmBox('Chuyển sang chế độ tự do?','Mạch hiện tại sẽ được xóa. Nếu muốn giữ lại, hãy bấm 💾 Lưu trước.','Chuyển',go); else go();
+}
+function addComp(type){
+  if(P()){ confirmBox('Thêm linh kiện vào dự án?','Dự án có sẵn linh kiện. Muốn thêm linh kiện tự do, em cần chuyển sang chế độ tự do (giữ nguyên board hiện tại).','Chuyển sang tự do',()=>{ const keep=S; S.project=null; S.comps=keep.comps; renderAll(); addComp(type); }); return; }
+  const n=S.comps.filter(c=>c.type===type).length+1; let id=type+n; while(S.comps.some(c=>c.id===id)) id=type+(++n);
+  const slots=[[90,60],[840,60],[90,250],[840,250],[90,440],[840,440],[90,600],[840,600]];
+  const used=S.comps.map(c=>[c.x,c.y]); const sl=slots.find(([x,y])=>!used.some(([ux,uy])=>Math.abs(ux-x)<120&&Math.abs(uy-y)<150))||[300,560];
+  S.comps.push({id,type,x:sl[0]+(type==='oled'&&sl[0]>500?-30:0),y:sl[1]});
+  closeModal(); renderAll(); autosave(); toast(`Đã thêm ${MODS[type].short}. Bấm vào chân để nối dây.`,'ok');
+}
+
+/* =========================================================
+   14. LƯU / MỞ / XUẤT / NHẬP
+   ========================================================= */
+function loadLocal(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function saveLocal(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+function delLocal(k){ try{ localStorage.removeItem(k); }catch(e){} }
+let asT=null;
+function autosave(){ lastXz=S.xz; clearTimeout(asT); asT=setTimeout(()=>saveLocal('esp32lab.autosave',S),600); }
+function snapshot(){ return JSON.parse(JSON.stringify(S)); }
+function applyState(st){
+  if(!st||!BOARDS[st.board]){ toast('File không hợp lệ.','err'); return false; }
+  stopCode(true);
+  const base=freshState(st.board,st.project&&PROJECTS[st.project]?st.project:null);
+  S=Object.assign(base,{name:st.name||'',comps:(st.comps||[]).filter(c=>MODS[c.type]),wires:(st.wires||[]),code:typeof st.code==='string'?st.code:base.code,xz:Object.assign(base.xz,st.xz||{})});
+  S.nextWire=Math.max(1,...S.wires.map(w=>w.id+1));
+  S.wires=S.wires.filter(w=>endPos(w.a)&&endPos(w.b));
+  lastXz=S.xz; UI.hintLv={}; UI.chat=[]; UI.pending=null; UI.selWire=null; UI.selComp=null;
+  setCode(S.code); renderAll(); autosave(); return true;
+}
+async function getDb(){
+  if(dbRef!==null) return dbRef||null;
+  const [db,user]=await Promise.all([cap('db'),cap('user')]);
+  try{ uid = user ? await user.id() : null; }catch(e){ uid=null; }
+  dbRef = (db&&uid) ? db : false; return dbRef||null;
+}
+const slugify=s=>viNoMark(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)||'bai-lam';
+function openSave(){
+  const def=S.name || ((P()?P().title:'Bài tự do')+' – '+new Date().toLocaleDateString('vi-VN'));
+  openModal(`<h2>💾 Lưu bài làm</h2><p class="sub">Bài được lưu vào tài khoản của em (nếu đã đăng nhập Claude) hoặc trên trình duyệt này. Muốn mang sang máy khác, dùng ⬇ Xuất file.</p>
+  <input class="inp" id="sName" value="${esc(def)}" maxlength="80"><div class="row" style="margin-top:12px"><button class="btn pri" id="sOk">Lưu</button><button class="btn" id="sNo">Hủy</button></div><p class="xz-msg" id="sMsg"></p>`);
+  $('#sNo').onclick=closeModal;
+  $('#sOk').onclick=async()=>{
+    const name=$('#sName').value.trim()||def; S.name=name; const data=snapshot(); const rec={name,savedAt:new Date().toISOString(),board:S.board,project:S.project,state:JSON.stringify(data)};
+    const key='save-'+slugify(name); $('#sOk').disabled=true; $('#sMsg').textContent='Đang lưu…';
+    let where='trình duyệt này';
+    const db=await getDb();
+    if(db){ try{ await db.collection('data/users/'+uid).doc(key).set(rec); where='tài khoản của em'; }catch(e){ if(e&&e.code==='quota_exceeded'){ $('#sMsg').className='xz-msg err'; $('#sMsg').textContent='Kho lưu trữ đã đầy. Hãy xóa bớt bài cũ trong 📂 Mở.'; $('#sOk').disabled=false; return; } } }
+    if(where!=='tài khoản của em'){ const idx=loadLocal('esp32lab.saves')||{}; idx[key]=rec; if(!saveLocal('esp32lab.saves',idx)){ $('#sMsg').className='xz-msg err'; $('#sMsg').textContent='Không lưu được trên trình duyệt này. Hãy dùng ⬇ Xuất file.'; $('#sOk').disabled=false; return; } }
+    autosave(); updateModeChip(); closeModal(); toast(`💾 Đã lưu “${name}” vào ${where}.`,'ok');
+  };
+}
+async function listSaves(){
+  const out=[]; const db=await getDb();
+  if(db){ try{ const snap=await Promise.race([db.collection('data/users/'+uid).get(),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),10000))]); snap.docs.forEach(d=>{ const v=d.data(); if(d.id.startsWith('save-')&&v) out.push({key:d.id,src:'db',...v}); }); }catch(e){} }
+  const idx=loadLocal('esp32lab.saves')||{}; Object.entries(idx).forEach(([k,v])=>out.push({key:k,src:'local',...v}));
+  return out.sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt)));
+}
+async function openSaves(){
+  openModal(`<h2>📂 Mở bài đã lưu</h2><p class="sub">Đang tải danh sách…</p>`);
+  const list=await listSaves();
+  const items=list.length? list.map((s,i)=>`<div class="saveitem"><span style="font-size:22px">${s.project&&PROJECTS[s.project]?PROJECTS[s.project].ic:'🧪'}</span><div><b>${esc(s.name)}</b><div style="font-size:12px;color:var(--muted)">${esc(BOARDS[s.board]?BOARDS[s.board].short:'')} · ${new Date(s.savedAt).toLocaleString('vi-VN')} · ${s.src==='db'?'☁️ tài khoản':'💻 trình duyệt'}</div></div><div class="sp"></div><button class="btn pri" data-open="${i}">Mở</button><button class="btn" data-del="${i}">Xóa</button></div>`).join('') : '<p class="sub">Chưa có bài nào được lưu.</p>';
+  openModal(`<h2>📂 Mở bài đã lưu</h2><p class="sub">Chọn bài để tiếp tục. Bài từ máy khác: dùng ⬆ Nhập file.</p><div class="savelist">${items}</div><div class="row" style="margin-top:12px"><button class="btn" id="oImp">⬆ Nhập file bài làm</button></div>`);
+  $('#oImp').onclick=openImport;
+  document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ const s=list[+b.dataset.open]; let st=null; try{ st=JSON.parse(s.state); }catch(e){} if(applyState(st)){ closeModal(); toast(`📂 Đã mở “${s.name}”.`,'ok'); } });
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{ const s=list[+b.dataset.del]; confirmBox('Xóa bài này?',`“${s.name}” sẽ bị xóa vĩnh viễn.`,'Xóa',async()=>{ if(s.src==='db'){ try{ await dbRef.collection('data/users/'+uid).doc(s.key).delete(); }catch(e){} } else { const idx=loadLocal('esp32lab.saves')||{}; delete idx[s.key]; saveLocal('esp32lab.saves',idx); } openSaves(); }); });
+}
+async function doExport(){
+  const name=S.name||(P()?P().title:'bai-tu-do');
+  const data=JSON.stringify({app:'esp32lab',exportedAt:new Date().toISOString(),...snapshot(),name},null,2);
+  const fn=slugify(name)+'.esp32lab.json';
+  if(!dlFn) dlFn=await cap('downloads');
+  if(dlFn){ try{ await dlFn.save({filename:fn,data}); toast('⬇ Đã xuất file '+fn,'ok'); return; }catch(e){ if(e&&e.code==='declined'){ toast('Em đã hủy xuất file.','info'); return; } } }
+  openModal(`<h2>⬇ Xuất bài làm</h2><p class="sub">Trang này không tải file trực tiếp được. Hãy bấm “Sao chép”, dán vào một file văn bản và lưu với tên <b>${esc(fn)}</b>. Lần sau dùng ⬆ Nhập file để mở lại.</p><textarea class="inp" id="eTxt" readonly>${esc(data)}</textarea><div class="row" style="margin-top:10px"><button class="btn pri" id="eCopy">📋 Sao chép</button><button class="btn" id="eClose">Đóng</button></div>`);
+  $('#eClose').onclick=closeModal;
+  $('#eCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(data); toast('Đã sao chép!','ok'); }catch(e){ $('#eTxt').select(); toast('Hãy bấm Ctrl+C (hoặc giữ để sao chép).','info'); } };
+}
+function openImport(){
+  openModal(`<h2>⬆ Nhập file bài làm</h2><p class="sub">Chọn file <b>.esp32lab.json</b> đã xuất trước đó, hoặc dán nội dung file vào ô bên dưới.</p>
+  <div class="row"><button class="btn pri" id="iFile">📁 Chọn file…</button></div>
+  <p style="margin:12px 0 6px;font-weight:600">Hoặc dán nội dung:</p><textarea class="inp" id="iTxt" placeholder='{"app":"esp32lab", ...}'></textarea><div class="row" style="margin-top:10px"><button class="btn" id="iPaste">Nhập từ nội dung đã dán</button></div><p class="xz-msg err" id="iMsg"></p>`);
+  $('#iFile').onclick=()=>{ $('#fileIn').value=''; $('#fileIn').click(); };
+  $('#iPaste').onclick=()=>importText($('#iTxt').value);
+}
+function importText(t){
+  let st=null; try{ st=JSON.parse(t); }catch(e){}
+  const m=$('#iMsg');
+  if(!st||!st.board||!BOARDS[st.board]){ if(m) m.textContent='Nội dung không phải file bài làm hợp lệ.'; else toast('File không hợp lệ.','err'); return; }
+  if(applyState(st)){ closeModal(); toast(`⬆ Đã nhập “${st.name||'bài làm'}”.`,'ok'); }
+}
+$('#fileIn').onchange=e=>{ const f=e.target.files[0]; if(!f) return; if(f.size>2e6){ toast('File quá lớn.','err'); return; } const r=new FileReader(); r.onload=()=>importText(String(r.result)); r.readAsText(f); };
+
+/* =========================================================
+   15. KHỞI ĐỘNG
+   ========================================================= */
+function toast(html,kind='info',raw){
+  const d=document.createElement('div'); d.className='toast '+kind; if(raw) d.innerHTML=html; else d.textContent=html;
+  $('#toasts').appendChild(d); while($('#toasts').children.length>4) $('#toasts').firstChild.remove();
+  setTimeout(()=>{ d.style.transition='opacity .4s'; d.style.opacity='0'; setTimeout(()=>d.remove(),400); }, kind==='err'||kind==='warn'?7000:4200);
+}
+function setTab(t){ UI.tab=t; document.querySelectorAll('.rtabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t)); $('#tab-circuit').hidden=t!=='circuit'; $('#tab-xz').hidden=t!=='xz'; if(t==='xz') renderXZ(); if(innerWidth<900) setMob('circ'); }
+document.querySelectorAll('.rtabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+function setMob(m){ document.body.classList.toggle('m-code',m==='code'); document.body.classList.toggle('m-circ',m==='circ'); document.querySelectorAll('#mobTabs button').forEach(b=>b.classList.toggle('pri',b.dataset.m===m)); }
+document.querySelectorAll('#mobTabs button').forEach(b=>b.onclick=()=>setMob(b.dataset.m));
+$('#hLib').onclick=()=>openLibrary();
+$('#hProj').onclick=openProjects;
+$('#hSave').onclick=openSave;
+$('#hOpen').onclick=openSaves;
+$('#hExport').onclick=doExport;
+$('#hImport').onclick=openImport;
+
+S=freshState('esp32',null);
+const auto=loadLocal('esp32lab.autosave');
+if(auto&&auto.xz) lastXz=auto.xz;
+setCode(S.code);
+renderAll();
+sys('Chào em! Chọn 📘 Thư viện mạch hoặc 🧩 Dự án để bắt đầu.');
+openWelcome();
+try{ speechSynthesis.getVoices(); }catch(e){}
+</script>
+</body>
+</html>

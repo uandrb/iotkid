@@ -1,0 +1,106 @@
+---
+title: "Bài 1: Nháy LED trên ESP32"
+slug: "nhay-led"
+order: 1
+level: "Dễ"
+durationMinutes: 30
+board: "esp32"
+modules:
+  - breadboard-mini
+  - day-jumper
+  - led-dien-tro-220
+goals:
+  - Hiểu GPIO (chân vào/ra đa năng) là gì.
+  - Bật/tắt LED theo chu kỳ bằng lệnh digitalWrite.
+  - Biết vì sao cần điện trở hạn dòng.
+labPreset: "preset-nhay-led"
+draft: false
+---
+
+<MucTieu items={frontmatter.goals} />
+
+<CanChuanBi moduleIds={frontmatter.modules} />
+
+## Sơ đồ nối dây
+
+<SoDoNoiDay
+  connections={[
+    { tu: "GPIO2", den: "LED (+) qua điện trở 220Ω" },
+    { tu: "GND", den: "LED (-)" }
+  ]}
+/>
+
+<CanhBao loai="an-toan">
+  ESP32 dùng mức logic 3.3V. Không nối thẳng 5V vào chân GPIO.
+</CanhBao>
+
+## Code
+
+<Code
+  language="cpp"
+  code={`const int LED_PIN = 2;
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);
+  digitalWrite(LED_PIN, LOW);
+  delay(500);
+}`}
+/>
+
+<GiaiThichDong
+  items={[
+    { dong: 1, y: "Chọn GPIO2 là chân điều khiển LED (LED onboard ESP32 DevKit V1)." },
+    { dong: 4, y: "Khai báo chân là OUTPUT để xuất tín hiệu." },
+    { dong: 8, y: "Xuất HIGH để bật LED." },
+    { dong: 9, y: "Chờ 500ms." },
+    { dong: 10, y: "Xuất LOW để tắt LED." },
+    { dong: 11, y: "Chờ 500ms rồi lặp lại." }
+  ]}
+/>
+
+<ThuThach hint="Thử đổi 500 thành 150 hoặc 1000 để thấy tốc độ nháy khác nhau.">
+  Thay đổi thời gian `delay` để tạo nhịp nháy nhanh/chậm khác nhau.
+</ThuThach>
+
+## Lỗi hay gặp
+
+<CanhBao loai="loi-hay-gap">
+  LED không sáng thường do cắm ngược cực hoặc quên nối GND.
+</CanhBao>
+
+## Quiz 3 câu
+
+<Quiz
+  lessonSlug={frontmatter.slug}
+  quizId="quiz-bai-1"
+  questions={[
+    {
+      id: "q1",
+      question: "GPIO trong ESP32 là gì?",
+      options: ["Bộ nhớ chương trình", "Chân vào/ra đa năng", "Tên của Wi-Fi"],
+      answerIndex: 1,
+      explanation: "GPIO là chân vào/ra đa năng để đọc hoặc xuất tín hiệu."
+    },
+    {
+      id: "q2",
+      question: "Vì sao cần điện trở khi dùng LED rời?",
+      options: ["Để LED nhấp nháy", "Để tăng điện áp", "Để hạn dòng bảo vệ LED và GPIO"],
+      answerIndex: 2,
+      explanation: "Điện trở giúp hạn dòng, tránh hỏng LED hoặc chân GPIO."
+    },
+    {
+      id: "q3",
+      question: "Trên ESP32 DevKit V1, LED onboard thường ở chân nào?",
+      options: ["GPIO2", "GPIO34", "GPIO21"],
+      answerIndex: 0,
+      explanation: "LED onboard phổ biến của ESP32 DevKit V1 là GPIO2."
+    }
+  ]}
+/>
+
+<MoTrongLab preset={frontmatter.labPreset} />

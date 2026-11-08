@@ -1,0 +1,350 @@
+[
+	{
+		"id": "led-dien-tro-220",
+		"ten": "LED + điện trở 220Ω",
+		"icon": "/images/modules/led-5mm.svg",
+		"dienAp": "3.3V (tham khảo)",
+		"moTa": "Mạch LED cơ bản để học xuất tín hiệu số và PWM.",
+		"chan": [
+			{ "nhan": "LED (+)", "canNoi": "gpio-ra" },
+			{ "nhan": "LED (-)", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Nối điện trở 220Ω nối tiếp với cực dương LED.",
+			"Dùng digitalWrite hoặc PWM để điều khiển độ sáng."
+		],
+		"loiHayGap": [
+			"Cắm ngược cực LED khiến đèn không sáng.",
+			"Quên điện trở làm LED hoặc GPIO nóng."
+		],
+		"tuKhoaTimMua": "led 5mm + điện trở 220ohm kit học esp32",
+		"giaThamKhao": "5.000–20.000 VNĐ (tham khảo)",
+		"codeMau": "nhay-led"
+	},
+	{
+		"id": "nut-nhan",
+		"ten": "Nút nhấn",
+		"icon": "/images/modules/nut-nhan.svg",
+		"dienAp": "3.3V logic (tham khảo)",
+		"moTa": "Nút nhấn cơ bản để tạo input số cho bài học.",
+		"chan": [
+			{ "nhan": "Chân 1", "canNoi": "gpio-vao" },
+			{ "nhan": "Chân 2", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Dùng INPUT_PULLUP để giảm linh kiện ngoài.",
+			"Nhấn nút sẽ kéo tín hiệu về LOW khi nối GND."
+		],
+		"loiHayGap": [
+			"Cắm lệch chân trên breadboard.",
+			"Đọc tín hiệu nhấp nháy do chưa chống dội phím."
+		],
+		"tuKhoaTimMua": "nút nhấn 4 chân 6x6 tactile switch",
+		"giaThamKhao": "1.000–10.000 VNĐ (tham khảo)",
+		"codeMau": "nut-nhan-bat-den"
+	},
+	{
+		"id": "bien-tro-10k",
+		"ten": "Biến trở 10kΩ",
+		"icon": "/images/modules/bien-tro.svg",
+		"dienAp": "3.3V (tham khảo)",
+		"moTa": "Tạo điện áp thay đổi để đọc bằng ADC.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "3v3" },
+			{ "nhan": "SIG", "canNoi": "adc" },
+			{ "nhan": "GND", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Nối chân giữa vào ADC1 để đọc ổn định khi dùng Wi-Fi.",
+			"Dùng map() chuyển giá trị ADC sang PWM."
+		],
+		"loiHayGap": [
+			"Nối nhầm chân giữa khiến giá trị không đổi.",
+			"Dùng ADC2 cùng Wi-Fi làm dữ liệu nhiễu."
+		],
+		"tuKhoaTimMua": "biến trở 10k rotary module",
+		"giaThamKhao": "8.000–25.000 VNĐ (tham khảo)",
+		"codeMau": "bien-tro-chinh-do-sang"
+	},
+	{
+		"id": "dht22",
+		"ten": "Cảm biến DHT22",
+		"icon": "/images/modules/dht22.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Đo nhiệt độ và độ ẩm không khí.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "DATA", "canNoi": "gpio" },
+			{ "nhan": "GND", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Nối DATA vào một GPIO rảnh và dùng thư viện DHT.",
+			"Đặt chu kỳ đọc từ 1–2 giây để dữ liệu ổn định."
+		],
+		"loiHayGap": [
+			"Dây DATA quá dài gây sai số hoặc mất tín hiệu.",
+			"Đọc quá nhanh vượt khả năng cập nhật của cảm biến."
+		],
+		"tuKhoaTimMua": "DHT22 AM2302 cảm biến nhiệt độ độ ẩm",
+		"giaThamKhao": "40.000–90.000 VNĐ (tham khảo)",
+		"codeMau": "cam-bien-dht22"
+	},
+	{
+		"id": "oled-ssd1306-i2c",
+		"ten": "OLED SSD1306 I2C",
+		"icon": "/images/modules/oled.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Màn hình nhỏ hiển thị chữ và biểu tượng.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "SDA", "canNoi": "gpio" },
+			{ "nhan": "SCL", "canNoi": "gpio" }
+		],
+		"cachDung": [
+			"Dùng cặp I2C mặc định của board (ESP32 thường là 21/22).",
+			"Kiểm tra địa chỉ I2C 0x3C hoặc 0x3D trước khi hiển thị."
+		],
+		"loiHayGap": [
+			"Nối nhầm SDA và SCL.",
+			"Dùng sai địa chỉ I2C nên màn hình trống."
+		],
+		"tuKhoaTimMua": "oled ssd1306 i2c 0.96 inch",
+		"giaThamKhao": "45.000–120.000 VNĐ (tham khảo)",
+		"codeMau": "giao-tiep-i2c-oled"
+	},
+	{
+		"id": "inmp441",
+		"ten": "Micro INMP441",
+		"icon": "/images/modules/mic.svg",
+		"dienAp": "CHỈ 3.3V",
+		"moTa": "Micro số I2S để thu âm thanh chất lượng tốt.",
+		"chan": [
+			{ "nhan": "VDD", "canNoi": "chi3v3" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "SCK", "canNoi": "gpio" },
+			{ "nhan": "WS", "canNoi": "gpio" },
+			{ "nhan": "SD", "canNoi": "gpio-vao" }
+		],
+		"cachDung": [
+			"Chỉ cấp 3.3V, không dùng 5V.",
+			"Chọn đúng chân I2S trong code để đọc dữ liệu."
+		],
+		"loiHayGap": [
+			"Cấp nhầm 5V làm hỏng micro.",
+			"Không đồng bộ xung I2S nên tiếng bị méo."
+		],
+		"tuKhoaTimMua": "INMP441 I2S microphone module 3.3V",
+		"giaThamKhao": "45.000–110.000 VNĐ (tham khảo)",
+		"codeMau": "du-an-robot-tro-ly-giong-noi"
+	},
+	{
+		"id": "max98357a",
+		"ten": "Ampli MAX98357A",
+		"icon": "/images/modules/amp.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Giải mã I2S ra công suất loa mono nhỏ.",
+		"chan": [
+			{ "nhan": "VIN", "canNoi": "nguon" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "BCLK", "canNoi": "gpio" },
+			{ "nhan": "LRC", "canNoi": "gpio" },
+			{ "nhan": "DIN", "canNoi": "gpio-ra" },
+			{ "nhan": "SPK+", "canNoi": "loa" },
+			{ "nhan": "SPK-", "canNoi": "loa" }
+		],
+		"cachDung": [
+			"Nối tín hiệu I2S từ ESP32 sang module.",
+			"Kết nối loa 4Ω 3W đúng cực để âm ổn định."
+		],
+		"loiHayGap": [
+			"Nối chung GND không chắc gây nhiễu tiếng.",
+			"Dùng loa trở kháng không phù hợp."
+		],
+		"tuKhoaTimMua": "MAX98357A I2S audio amplifier",
+		"giaThamKhao": "45.000–110.000 VNĐ (tham khảo)",
+		"codeMau": "du-an-robot-tro-ly-giong-noi"
+	},
+	{
+		"id": "loa-4ohm-3w",
+		"ten": "Loa 4Ω 3W",
+		"icon": "/images/modules/speaker.svg",
+		"dienAp": "Dùng qua ampli (tham khảo)",
+		"moTa": "Loa đơn dùng với MAX98357A để phát âm.",
+		"chan": [
+			{ "nhan": "SPK+", "canNoi": "loa" },
+			{ "nhan": "SPK-", "canNoi": "loa" }
+		],
+		"cachDung": [
+			"Nối trực tiếp vào ngõ loa của ampli, không nối thẳng vào GPIO.",
+			"Cố định loa chắc để giảm rung và rè."
+		],
+		"loiHayGap": [
+			"Nối loa thẳng GPIO gây nhỏ tiếng hoặc hỏng chân.",
+			"Dây loa quá mảnh làm sụt áp."
+		],
+		"tuKhoaTimMua": "loa 4ohm 3w mini",
+		"giaThamKhao": "15.000–50.000 VNĐ (tham khảo)",
+		"codeMau": "du-an-robot-tro-ly-giong-noi"
+	},
+	{
+		"id": "relay-1-kenh-cach-ly",
+		"ten": "Relay 1 kênh có cách ly",
+		"icon": "/images/modules/relay.svg",
+		"dienAp": "Tùy module, thường 5V cuộn hút (tham khảo)",
+		"moTa": "Đóng cắt tải ngoài qua tín hiệu GPIO, có opto cách ly.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "IN", "canNoi": "gpio-ra" }
+		],
+		"cachDung": [
+			"Luôn kiểm tra mức kích relay (LOW/HIGH) của module cụ thể.",
+			"Chỉ dùng tải an toàn điện thấp trong bài học cơ bản."
+		],
+		"loiHayGap": [
+			"Nhầm chân COM/NO/NC.",
+			"Không tách nguồn phù hợp giữa phần điều khiển và tải."
+		],
+		"tuKhoaTimMua": "relay 1 kênh opto cách ly",
+		"giaThamKhao": "18.000–45.000 VNĐ (tham khảo)",
+		"codeMau": "web-server-dieu-khien-den"
+	},
+	{
+		"id": "servo-sg90",
+		"ten": "Servo SG90",
+		"icon": "/images/modules/servo.svg",
+		"dienAp": "4.8V–6V nguồn servo (tham khảo)",
+		"moTa": "Động cơ servo mini để quay theo góc.",
+		"chan": [
+			{ "nhan": "Nâu (GND)", "canNoi": "gnd" },
+			{ "nhan": "Đỏ (VCC)", "canNoi": "nguon" },
+			{ "nhan": "Cam (SIG)", "canNoi": "gpio-ra" }
+		],
+		"cachDung": [
+			"Cấp nguồn riêng cho servo khi cần lực lớn.",
+			"Nối chung GND giữa nguồn servo và ESP32."
+		],
+		"loiHayGap": [
+			"Cấp thiếu dòng làm servo giật hoặc reset board.",
+			"Không nối chung mass khiến tín hiệu PWM sai."
+		],
+		"tuKhoaTimMua": "servo sg90 9g",
+		"giaThamKhao": "25.000–60.000 VNĐ (tham khảo)",
+		"codeMau": "du-an-robot-tro-ly-giong-noi"
+	},
+	{
+		"id": "hc-sr04",
+		"ten": "Cảm biến siêu âm HC-SR04",
+		"icon": "/images/modules/hcsr04.svg",
+		"dienAp": "5V cấp nguồn, Echo 5V cần chia áp",
+		"moTa": "Đo khoảng cách bằng sóng siêu âm.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "Trig", "canNoi": "gpio-ra" },
+			{ "nhan": "Echo", "canNoi": "gpio-vao" },
+			{ "nhan": "GND", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Dùng chia áp cho chân Echo trước khi vào ESP32.",
+			"Đọc thời gian phản hồi và đổi ra cm."
+		],
+		"loiHayGap": [
+			"Nối Echo trực tiếp 5V vào GPIO 3.3V.",
+			"Đặt cảm biến quá sát vật làm số đo sai."
+		],
+		"tuKhoaTimMua": "hc-sr04 ultrasonic distance sensor",
+		"giaThamKhao": "20.000–50.000 VNĐ (tham khảo)",
+		"codeMau": "du-an-robot-tro-ly-giong-noi"
+	},
+	{
+		"id": "cam-bien-anh-sang-ldr",
+		"ten": "Cảm biến ánh sáng (LDR module)",
+		"icon": "/images/modules/ldr.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Đo độ sáng môi trường để tự bật/tắt đèn.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "AO", "canNoi": "adc" }
+		],
+		"cachDung": [
+			"Nối AO vào chân ADC1 để đọc analog ổn định.",
+			"Có thể đặt ngưỡng để bật đèn khi trời tối."
+		],
+		"loiHayGap": [
+			"Nối AO vào chân không có ADC.",
+			"Đặt ngưỡng quá thấp làm đèn không bật."
+		],
+		"tuKhoaTimMua": "module cảm biến ánh sáng ldr",
+		"giaThamKhao": "15.000–35.000 VNĐ (tham khảo)",
+		"codeMau": "den-ngu-tu-bat"
+	},
+	{
+		"id": "cam-bien-do-am-dat",
+		"ten": "Cảm biến độ ẩm đất",
+		"icon": "/images/modules/soil.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Đo độ ẩm đất để quyết định tưới cây.",
+		"chan": [
+			{ "nhan": "VCC", "canNoi": "nguon" },
+			{ "nhan": "GND", "canNoi": "gnd" },
+			{ "nhan": "AO", "canNoi": "adc" }
+		],
+		"cachDung": [
+			"Dùng ngõ AO để đọc liên tục bằng analogRead.",
+			"Nên hiệu chỉnh ngưỡng theo từng loại đất."
+		],
+		"loiHayGap": [
+			"Cắm đầu dò ngập nước quá sâu lâu ngày.",
+			"Không hiệu chỉnh nên tưới sai thời điểm."
+		],
+		"tuKhoaTimMua": "cảm biến độ ẩm đất module",
+		"giaThamKhao": "15.000–40.000 VNĐ (tham khảo)",
+		"codeMau": "cay-tu-tuoi"
+	},
+	{
+		"id": "cong-tac-tu-reed",
+		"ten": "Công tắc từ cửa (reed switch)",
+		"icon": "/images/modules/reed.svg",
+		"dienAp": "Tín hiệu số (tham khảo)",
+		"moTa": "Phát hiện cửa mở/đóng bằng nam châm.",
+		"chan": [
+			{ "nhan": "SIG", "canNoi": "gpio-vao" },
+			{ "nhan": "GND", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Thường dùng với INPUT_PULLUP để đọc trạng thái ổn định.",
+			"Gắn reed và nam châm thẳng hàng."
+		],
+		"loiHayGap": [
+			"Khoảng cách nam châm quá xa làm tín hiệu chập chờn.",
+			"Gắn lệch vị trí nên luôn báo mở."
+		],
+		"tuKhoaTimMua": "reed switch công tắc từ cửa",
+		"giaThamKhao": "12.000–35.000 VNĐ (tham khảo)",
+		"codeMau": "bao-dong-cua-mo"
+	},
+	{
+		"id": "coi-buzzer-3v3",
+		"ten": "Còi buzzer chủ động 3.3V",
+		"icon": "/images/modules/buzzer.svg",
+		"dienAp": "3.3V–5V (tham khảo)",
+		"moTa": "Phát âm báo khi có sự kiện cảnh báo.",
+		"chan": [
+			{ "nhan": "SIG", "canNoi": "gpio-ra" },
+			{ "nhan": "GND", "canNoi": "gnd" }
+		],
+		"cachDung": [
+			"Dùng digitalWrite để bật/tắt còi nhanh.",
+			"Nếu còi lớn dòng cao thì cần transistor đệm."
+		],
+		"loiHayGap": [
+			"Đấu nhầm cực SIG và GND.",
+			"Dùng còi 5V loại dòng lớn nối thẳng GPIO."
+		],
+		"tuKhoaTimMua": "buzzer chủ động 3.3v module",
+		"giaThamKhao": "10.000–30.000 VNĐ (tham khảo)",
+		"codeMau": "bao-dong-cua-mo"
+	}
+]

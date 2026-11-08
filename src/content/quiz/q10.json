@@ -1,0 +1,12 @@
+{
+  "id": "q10",
+  "question": "INMP441 cần lưu ý nguồn nào?",
+  "options": [
+    { "text": "Chỉ 3.3V", "correct": true },
+    { "text": "Chỉ 12V", "correct": false },
+    { "text": "Chỉ 9V", "correct": false },
+    { "text": "5V luôn an toàn", "correct": false }
+  ],
+  "explanation": "INMP441 là module nhạy điện áp, dùng 3.3V để an toàn.",
+  "lessonLink": "/linh-kien/inmp441"
+}

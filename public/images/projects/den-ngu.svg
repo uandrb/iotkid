@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" role="img" aria-label="Đèn ngủ tự bật">
+  <rect width="480" height="260" rx="24" fill="#0f172a"/>
+  <circle cx="110" cy="70" r="30" fill="#fef3c7"/>
+  <rect x="180" y="120" width="120" height="20" rx="10" fill="#334155"/>
+  <rect x="214" y="82" width="52" height="48" rx="10" fill="#f59e0b"/>
+  <path d="M330 140 h70 v40 h-70z" fill="#0ea5e9"/>
+</svg>

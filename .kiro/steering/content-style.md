@@ -1,0 +1,35 @@
+# Content & UI Style Steering
+
+- Giọng văn:
+  - Xưng "em" khi nói với học sinh.
+  - Thân thiện, khuyến khích, rõ ràng.
+  - Câu ngắn, ưu tiên dưới 25 từ.
+  - Thuật ngữ tiếng Anh phải giải thích ở lần đầu (ví dụ: GPIO = chân vào/ra đa năng).
+- Cấu trúc bắt buộc cho mỗi bài học:
+  - Mục tiêu.
+  - Cần chuẩn bị.
+  - Sơ đồ nối dây.
+  - Code.
+  - Giải thích từng dòng.
+  - Thử thách.
+  - Lỗi hay gặp.
+  - Quiz 3 câu.
+- Cảnh báo an toàn điện (luôn hiển thị khi liên quan):
+  - ESP32 dùng logic 3.3V.
+  - Không chập nguồn với GND.
+  - Cẩn thận với pin Li-ion.
+  - Không tự đấu điện lưới 220V.
+- Phong cách giao diện:
+  - Sáng, vui, cảm giác xưởng sáng chế.
+  - Nền màu kem.
+  - Chữ xanh than.
+  - Một màu nhấn cam.
+  - Một màu nhấn xanh ngọc.
+  - Góc bo tròn.
+  - Minh họa SVG phẳng tự vẽ.
+  - Không dùng nhân vật có bản quyền.
+- Tiếp cận (Accessibility):
+  - Tương phản chữ tối thiểu 4.5:1.
+  - Không chỉ dùng màu để báo đúng/sai; luôn kèm chữ hoặc biểu tượng.
+  - Tất cả điều khiển phải dùng được bằng bàn phím.
+  - Vùng bấm trên điện thoại tối thiểu 44px.

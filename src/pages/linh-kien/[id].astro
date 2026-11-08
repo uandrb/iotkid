@@ -1,0 +1,217 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import PinoutBoard from '../../components/PinoutBoard.astro';
+import { boards, boardMap, moduleMap, modulesCatalog } from '../../lib/catalog';
+import { getVisibleLessons } from '../../lib/lessons';
+
+export async function getStaticPaths() {
+	return [...boards, ...modulesCatalog].map((item) => ({
+		params: { id: item.id }
+	}));
+}
+
+const { id } = Astro.params;
+const board = id ? boardMap.get(id) : undefined;
+const moduleItem = id ? moduleMap.get(id) : undefined;
+
+if (!board && !moduleItem) {
+	return Astro.redirect('/404');
+}
+
+const lessons = await getVisibleLessons();
+const relatedLessons = moduleItem
+	? lessons.filter((lesson) => lesson.data.modules.includes(moduleItem.id))
+	: [];
+const relatedModules = board
+	? board.moduleKetHop
+			.map((moduleId) => moduleMap.get(moduleId))
+			.filter((item): item is (typeof modulesCatalog)[number] => Boolean(item))
+	: [];
+---
+
+<MainLayout title={`${board?.ten ?? moduleItem?.ten} | Linh kiện | Xưởng IoT`}>
+	{
+		board && (
+			<section>
+				<p class="tag">Board</p>
+				<h1>{board.ten}</h1>
+				<p>{board.moTa}</p>
+				<p class="meta">Chip: {board.chip}</p>
+
+				<PinoutBoard board={board} />
+
+				<h2>Nhóm chân cần nhớ</h2>
+				<div class="group-grid">
+					<article><h3>Chỉ đọc</h3><p>{board.nhomDacBiet.chiDoc.join(', ') || 'Không có'}</p></article>
+					<article><h3>Strapping</h3><p>{board.nhomDacBiet.strapping.join(', ') || 'Không có'}</p></article>
+					<article><h3>UART</h3><p>{board.nhomDacBiet.uart.join(' · ') || 'Không có'}</p></article>
+					<article><h3>USB</h3><p>{board.nhomDacBiet.usb.join(', ') || 'Không có'}</p></article>
+					<article><h3>Không dùng</h3><p>{board.nhomDacBiet.khongDung.join(', ') || 'Không có'}</p></article>
+					<article><h3>ADC1</h3><p>{board.nhomDacBiet.adc1.join(', ') || 'Không có'}</p></article>
+					<article><h3>ADC2</h3><p>{board.nhomDacBiet.adc2.join(', ') || 'Không có'}</p></article>
+					<article>
+						<h3>I²C mặc định</h3>
+						<p>
+							SDA {board.nhomDacBiet.i2cMacDinh.sda} · SCL {board.nhomDacBiet.i2cMacDinh.scl}
+						</p>
+					</article>
+					<article>
+						<h3>LED trên board</h3>
+						<p>{String(board.nhomDacBiet.ledTrenBoard)}</p>
+					</article>
+				</div>
+
+				<h2>Cách sử dụng</h2>
+				<ul>
+					{board.cachDung.map((item) => <li>{item}</li>)}
+				</ul>
+
+				<h2>Module kết hợp</h2>
+				<div class="module-grid">
+					{
+						relatedModules.map((item) => (
+							<article class="module-card">
+								<img src={item.icon} alt={item.ten} width="120" height="80" loading="lazy" />
+								<h3>
+									<a href={`/linh-kien/${item.id}`}>{item.ten}</a>
+								</h3>
+								<p>{item.moTa}</p>
+							</article>
+						))
+					}
+				</div>
+			</section>
+		)
+	}
+
+	{
+		moduleItem && (
+			<section>
+				<p class="tag">Module</p>
+				<h1>{moduleItem.ten}</h1>
+				<p>{moduleItem.moTa}</p>
+				<p class="meta">{moduleItem.dienAp}</p>
+
+				<h2>Bảng chân và nơi nối</h2>
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>Chân</th>
+								<th>Nối vào đâu</th>
+							</tr>
+						</thead>
+						<tbody>
+							{moduleItem.chan.map((pin) => <tr><td>{pin.nhan}</td><td>{pin.canNoi}</td></tr>)}
+						</tbody>
+					</table>
+				</div>
+
+				<h2>Cách sử dụng</h2>
+				<ul>{moduleItem.cachDung.map((item) => <li>{item}</li>)}</ul>
+
+				<h2>Lỗi hay gặp</h2>
+				<ul>{moduleItem.loiHayGap.map((item) => <li>{item}</li>)}</ul>
+
+				<h2>Từ khóa tìm mua</h2>
+				<p>{moduleItem.tuKhoaTimMua}</p>
+				<p class="meta">{moduleItem.giaThamKhao}</p>
+
+				<h2>Bài học có dùng module này</h2>
+				{relatedLessons.length > 0 ? (
+					<ul>
+						{relatedLessons.map((lesson) => <li><a href={`/bai-hoc/${lesson.data.slug}`}>{lesson.data.title}</a></li>)}
+					</ul>
+				) : (
+					<p>Chưa có bài học xuất bản dùng module này.</p>
+				)}
+
+				<p>
+					<a class="lab-btn" href={`/phong-lab?preset=${moduleItem.id}`}>Thử trong Phòng Lab</a>
+				</p>
+			</section>
+		)
+	}
+</MainLayout>
+
+<style>
+	.tag {
+		margin: 0;
+		color: var(--color-muted);
+		font-size: var(--text-1);
+	}
+
+	.meta {
+		color: var(--color-muted);
+	}
+
+	.group-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.group-grid article,
+	.module-card {
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.group-grid h3,
+	.module-card h3 {
+		margin-top: 0;
+	}
+
+	.group-grid p {
+		margin-bottom: 0;
+		word-break: break-word;
+	}
+
+	.module-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+		gap: var(--space-2);
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+	}
+
+	table {
+		min-width: 420px;
+		border-collapse: collapse;
+		border: 1px solid var(--color-border);
+	}
+
+	th,
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--color-border);
+		text-align: left;
+		font-size: 0.9rem;
+	}
+
+	.lab-btn {
+		display: inline-flex;
+		min-height: 44px;
+		align-items: center;
+		justify-content: center;
+		padding: 10px 14px;
+		border-radius: var(--radius-sm);
+		background: var(--color-accent-teal);
+		color: #062721;
+		font-weight: 700;
+		text-decoration: none;
+	}
+</style>
+
+<script>
+	import { trackCatalogView } from '../../lib/progress';
+
+	const itemId = window.location.pathname.split('/').filter(Boolean).pop();
+	if (itemId) {
+		trackCatalogView(itemId);
+	}
+</script>

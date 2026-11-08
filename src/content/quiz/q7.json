@@ -1,0 +1,12 @@
+{
+  "id": "q7",
+  "question": "Mức logic an toàn cho phần lớn GPIO ESP32 là:",
+  "options": [
+    { "text": "1.8V", "correct": false },
+    { "text": "3.3V", "correct": true },
+    { "text": "5V", "correct": false },
+    { "text": "12V", "correct": false }
+  ],
+  "explanation": "GPIO ESP32 làm việc ở mức logic 3.3V.",
+  "lessonLink": "/linh-kien/esp32-devkit-v1"
+}

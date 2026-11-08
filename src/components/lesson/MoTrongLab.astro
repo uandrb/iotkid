@@ -1,0 +1,27 @@
+---
+interface Props {
+	preset: string;
+}
+
+const { preset } = Astro.props;
+const href = preset ? `/phong-lab?preset=${encodeURIComponent(preset)}` : '/phong-lab';
+---
+
+<p>
+	<a class="lab-link" href={href}>Mở trong Phòng Lab</a>
+</p>
+
+<style>
+	.lab-link {
+		display: inline-flex;
+		min-height: 44px;
+		align-items: center;
+		justify-content: center;
+		padding: 10px 14px;
+		border-radius: var(--radius-sm);
+		background: var(--color-accent-teal);
+		color: #05231f;
+		font-weight: 700;
+		text-decoration: none;
+	}
+</style>

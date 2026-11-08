@@ -1,0 +1,182 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+
+const quizModules = import.meta.glob('../content/quiz/*.json', { eager: true });
+const allQuiz = Object.values(quizModules).map((item) => item.default ?? item);
+---
+
+<MainLayout title="Ôn tập | Xưởng IoT">
+	<h1>Ôn tập nhanh</h1>
+	<p>Làm 10 câu ngẫu nhiên hoặc chuyển sang chế độ thẻ ghi nhớ.</p>
+
+	<div class="toolbar">
+		<button type="button" id="btn-random">Lấy bộ 10 câu mới</button>
+		<button type="button" id="btn-mode">Chuyển sang flashcard</button>
+	</div>
+
+	<section id="quiz-mode" class="panel"></section>
+	<section id="flash-mode" class="panel hidden"></section>
+</MainLayout>
+
+<script define:vars={{ allQuiz }}>
+	const state = {
+		mode: 'quiz',
+		items: []
+	};
+
+	const randomPick = () => {
+		const list = [...allQuiz];
+		for (let i = list.length - 1; i > 0; i -= 1) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[list[i], list[j]] = [list[j], list[i]];
+		}
+		state.items = list.slice(0, 10);
+	};
+
+	const quizRoot = document.getElementById('quiz-mode');
+	const flashRoot = document.getElementById('flash-mode');
+
+	const renderQuiz = () => {
+		if (!quizRoot) return;
+		quizRoot.innerHTML = state.items
+			.map(
+				(item, index) => `
+				<article class="q-card" data-qid="${item.id}">
+					<h2>Câu ${index + 1}</h2>
+					<p>${item.question}</p>
+					<div class="opts">
+						${item.options
+							.map(
+								(option, optionIndex) => `
+								<label>
+									<input type="radio" name="q-${item.id}" value="${optionIndex}" />
+									<span>${option.text}</span>
+								</label>
+							`
+							)
+							.join('')}
+					</div>
+					<p class="feedback" aria-live="polite"></p>
+					<p class="exp hidden">${item.explanation} · <a href="${item.lessonLink}">Xem bài liên quan</a></p>
+				</article>
+			`
+			)
+			.join('');
+
+		quizRoot.querySelectorAll('.q-card').forEach((card) => {
+			card.querySelectorAll('input[type="radio"]').forEach((input) => {
+				input.addEventListener('change', () => {
+					const item = state.items.find((quiz) => quiz.id === card.dataset.qid);
+					if (!item) return;
+					const selected = Number(input.value);
+					const correctIndex = item.options.findIndex((option) => option.correct);
+					const feedback = card.querySelector('.feedback');
+					const exp = card.querySelector('.exp');
+					if (feedback) {
+						feedback.textContent =
+							selected === correctIndex ? '✅ Đúng rồi!' : `❌ Chưa đúng. Đáp án đúng là lựa chọn ${correctIndex + 1}.`;
+					}
+					exp?.classList.remove('hidden');
+				});
+			});
+		});
+	};
+
+	const renderFlash = () => {
+		if (!flashRoot) return;
+		flashRoot.innerHTML = state.items
+			.map(
+				(item) => `
+				<details class="flash-card">
+					<summary>${item.question}</summary>
+					<p><strong>Đáp án đúng:</strong> ${item.options.find((option) => option.correct)?.text ?? ''}</p>
+					<p>${item.explanation}</p>
+					<p><a href="${item.lessonLink}">Xem bài liên quan</a></p>
+				</details>
+			`
+			)
+			.join('');
+	};
+
+	const syncMode = () => {
+		const quiz = document.getElementById('quiz-mode');
+		const flash = document.getElementById('flash-mode');
+		const modeBtn = document.getElementById('btn-mode');
+		if (!quiz || !flash || !modeBtn) return;
+		if (state.mode === 'quiz') {
+			quiz.classList.remove('hidden');
+			flash.classList.add('hidden');
+			modeBtn.textContent = 'Chuyển sang flashcard';
+		} else {
+			quiz.classList.add('hidden');
+			flash.classList.remove('hidden');
+			modeBtn.textContent = 'Chuyển sang quiz';
+		}
+	};
+
+	randomPick();
+	renderQuiz();
+	renderFlash();
+	syncMode();
+
+	document.getElementById('btn-random')?.addEventListener('click', () => {
+		randomPick();
+		renderQuiz();
+		renderFlash();
+	});
+
+	document.getElementById('btn-mode')?.addEventListener('click', () => {
+		state.mode = state.mode === 'quiz' ? 'flash' : 'quiz';
+		syncMode();
+	});
+</script>
+
+<style>
+	.toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+		margin-bottom: var(--space-2);
+	}
+
+	button {
+		min-height: 44px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		padding: 10px 14px;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.panel {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.q-card,
+	.flash-card {
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.q-card h2 {
+		margin: 0 0 8px;
+		font-size: var(--text-2);
+	}
+
+	.opts {
+		display: grid;
+		gap: 8px;
+	}
+
+	label {
+		display: inline-flex;
+		gap: 8px;
+	}
+
+	.hidden {
+		display: none;
+	}
+</style>

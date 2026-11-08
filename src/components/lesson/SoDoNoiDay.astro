@@ -1,0 +1,127 @@
+---
+interface Connection {
+	tu: string;
+	den: string;
+}
+
+interface Props {
+	connections: Connection[];
+}
+
+const { connections = [] } = Astro.props;
+
+function wireColor(source: string): string {
+	const lower = source.toLowerCase();
+	if (lower.includes('gnd')) {
+		return '#111827';
+	}
+	if (lower.includes('3v3') || lower.includes('vcc') || lower.includes('5v')) {
+		return '#dc2626';
+	}
+	return '#1ea89b';
+}
+
+const svgHeight = Math.max(160, connections.length * 30 + 40);
+---
+
+<section class="lesson-block">
+	<h2>Sơ đồ nối dây</h2>
+	<div class="wiring-wrap">
+		<table>
+			<thead>
+				<tr>
+					<th>Từ</th>
+					<th>Đến</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					connections.map((conn) => (
+						<tr>
+							<td>{conn.tu}</td>
+							<td>{conn.den}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+		<svg viewBox={`0 0 380 ${svgHeight}`} role="img" aria-label="Minh họa sơ đồ nối dây">
+			<rect x="20" y="16" width="120" height={svgHeight - 32} rx="14" class="box" />
+			<rect x="240" y="16" width="120" height={svgHeight - 32} rx="14" class="box" />
+			<text x="80" y="36" text-anchor="middle">Nguồn/chân trái</text>
+			<text x="300" y="36" text-anchor="middle">Chân đích</text>
+			{
+				connections.map((conn, index) => {
+					const y = 62 + index * 28;
+					return (
+						<g>
+							<text x="80" y={y} text-anchor="middle">
+								{conn.tu}
+							</text>
+							<text x="300" y={y} text-anchor="middle">
+								{conn.den}
+							</text>
+							<line x1="146" y1={y - 5} x2="234" y2={y - 5} stroke={wireColor(conn.tu)} stroke-width="4" />
+						</g>
+					);
+				})
+			}
+		</svg>
+	</div>
+</section>
+
+<style>
+	.lesson-block {
+		margin-block: var(--space-3);
+	}
+
+	.wiring-wrap {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-2);
+		align-items: start;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		overflow: hidden;
+	}
+
+	th,
+	td {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--color-border);
+		text-align: left;
+	}
+
+	th {
+		background: color-mix(in srgb, var(--color-accent-teal) 12%, transparent);
+	}
+
+	svg {
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		padding: 8px;
+	}
+
+	.box {
+		fill: color-mix(in srgb, var(--color-accent-teal) 8%, transparent);
+		stroke: var(--color-border);
+	}
+
+	text {
+		font-size: 11px;
+		fill: var(--color-text);
+	}
+
+	@media (max-width: 900px) {
+		.wiring-wrap {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

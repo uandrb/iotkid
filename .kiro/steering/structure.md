@@ -1,0 +1,28 @@
+# Structure Steering
+
+- Cấu trúc thư mục chuẩn:
+  - `src/pages`: route.
+  - `src/layouts`: layout dùng chung.
+  - `src/components`: component tĩnh, đặt tên `PascalCase.astro`.
+  - `src/islands`: component có tương tác phía client.
+  - `src/lib`: logic TypeScript thuần, có test đi kèm.
+  - `src/content/lessons`: nội dung bài học.
+  - `src/content/projects`: nội dung dự án.
+  - `src/data/boards.json`: dữ liệu board.
+  - `src/data/modules.json`: dữ liệu module/linh kiện.
+  - `src/styles`: styles và tokens.
+  - `public/images`: ảnh tĩnh.
+- Quy ước URL:
+  - Dùng tiếng Việt không dấu.
+  - Dùng `kebab-case`.
+  - Ví dụ:
+    - `/lo-trinh`
+    - `/bai-hoc/nhay-led`
+    - `/linh-kien/esp32`
+    - `/phong-lab`
+    - `/du-an`
+    - `/tien-do`
+- Kiến trúc mô phỏng:
+  - Logic mô phỏng đặt trong `src/lib/sim`.
+  - Tách khỏi giao diện để test độc lập.
+  - Bao gồm kiểm tra dây nối và chạy code.

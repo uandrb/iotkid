@@ -1,0 +1,36 @@
+---
+interface Explanation {
+	dong: number;
+	y: string;
+}
+
+interface Props {
+	items: Explanation[];
+}
+
+const { items = [] } = Astro.props;
+---
+
+<section class="lesson-block">
+	<h2>Giải thích từng dòng</h2>
+	<ol>
+		{
+			items.map((item) => (
+				<li>
+					<strong>Dòng {item.dong}:</strong> {item.y}
+				</li>
+			))
+		}
+	</ol>
+</section>
+
+<style>
+	.lesson-block {
+		margin-block: var(--space-3);
+	}
+
+	ol {
+		display: grid;
+		gap: var(--space-1);
+	}
+</style>

@@ -1,0 +1,183 @@
+---
+import { render } from 'astro:content';
+import MainLayout from '../../layouts/MainLayout.astro';
+import { lessonComponents } from '../../components/lesson';
+import { getVisibleLessons } from '../../lib/lessons';
+
+export async function getStaticPaths() {
+	const lessons = await getVisibleLessons();
+	return lessons.map((lesson) => ({
+		params: { slug: lesson.data.slug },
+		props: { lesson }
+	}));
+}
+
+const { lesson } = Astro.props;
+const lessons = await getVisibleLessons();
+const currentIndex = lessons.findIndex((entry) => entry.id === lesson.id);
+const previousLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+const nextLesson = currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+const { Content, headings } = await render(lesson);
+---
+
+<MainLayout title={`${lesson.data.title} | Xưởng IoT`}>
+	<div class="lesson-page">
+		<article class="content">
+			<header class="lesson-head">
+				<p class="order">Bài {lesson.data.order}</p>
+				<h1>{lesson.data.title}</h1>
+				<p class="meta">
+					<span>{lesson.data.level}</span> · <span>{lesson.data.durationMinutes} phút</span> ·
+					<span>Board: {lesson.data.board.toUpperCase()}</span>
+				</p>
+			</header>
+
+			<Content components={lessonComponents} />
+
+			<footer class="lesson-actions" data-lesson={lesson.data.slug}>
+				<p>
+					Trạng thái bài học: <strong data-status-text>Chưa học</strong>
+				</p>
+				<button type="button" class="mark-done">Đánh dấu đã học xong</button>
+				<nav class="pager" aria-label="Điều hướng bài học">
+					{previousLesson ? <a href={`/bai-hoc/${previousLesson.data.slug}`}>← Bài trước</a> : <span></span>}
+					{nextLesson ? <a href={`/bai-hoc/${nextLesson.data.slug}`}>Bài sau →</a> : <span></span>}
+				</nav>
+			</footer>
+		</article>
+
+		<aside class="toc">
+			<h2>Mục lục</h2>
+			<ul>
+				{
+					headings
+						.filter((heading) => heading.depth === 2)
+						.map((heading) => (
+							<li>
+								<a href={`#${heading.slug}`}>{heading.text}</a>
+							</li>
+						))
+				}
+			</ul>
+		</aside>
+	</div>
+</MainLayout>
+
+<script>
+	import { getLessonStatus, markLessonDone, setLessonStatus } from '../../lib/progress';
+
+	const statusText = {
+		'chua-hoc': 'Chưa học',
+		'dang-hoc': 'Đang học',
+		'da-xong': 'Đã xong'
+	};
+
+	document.querySelectorAll('.lesson-actions').forEach((actions) => {
+		const slug = actions.dataset.lesson;
+		if (!slug) return;
+		const statusNode = actions.querySelector('[data-status-text]');
+		const doneButton = actions.querySelector('.mark-done');
+		let current = getLessonStatus(slug);
+		if (current !== 'da-xong') {
+			setLessonStatus(slug, 'dang-hoc');
+			current = 'dang-hoc';
+		}
+		if (statusNode) {
+			statusNode.textContent = statusText[current];
+		}
+		if (!doneButton) return;
+		doneButton.addEventListener('click', () => {
+			if (markLessonDone(slug) && statusNode) {
+				statusNode.textContent = statusText['da-xong'];
+				doneButton.textContent = 'Đã đánh dấu xong';
+			}
+		});
+	});
+</script>
+
+<style>
+	.lesson-page {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 280px;
+		gap: var(--space-3);
+		align-items: start;
+	}
+
+	.content {
+		max-width: 72ch;
+	}
+
+	.lesson-head {
+		margin-bottom: var(--space-3);
+	}
+
+	.order {
+		margin: 0;
+		color: var(--color-muted);
+		font-size: var(--text-1);
+	}
+
+	.meta {
+		color: var(--color-muted);
+	}
+
+	.toc {
+		position: sticky;
+		top: 92px;
+		padding: var(--space-2);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		background: var(--color-surface);
+	}
+
+	.toc h2 {
+		margin-top: 0;
+		font-size: var(--text-2);
+	}
+
+	.toc ul {
+		margin: 0;
+		padding-left: 18px;
+		display: grid;
+		gap: 8px;
+	}
+
+	.lesson-actions {
+		margin-top: var(--space-4);
+		padding-top: var(--space-2);
+		border-top: 1px solid var(--color-border);
+	}
+
+	.mark-done {
+		min-height: 44px;
+		padding: 10px 16px;
+		border-radius: var(--radius-sm);
+		border: none;
+		background: var(--color-accent-orange);
+		color: #2c1700;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.pager {
+		margin-top: var(--space-2);
+		display: flex;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+
+	.pager a {
+		text-decoration: none;
+		font-weight: 600;
+	}
+
+	@media (max-width: 980px) {
+		.lesson-page {
+			grid-template-columns: 1fr;
+		}
+
+		.toc {
+			position: static;
+		}
+	}
+</style>

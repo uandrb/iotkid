@@ -1,0 +1,32 @@
+# Product Steering
+
+- Tên sản phẩm: **[TÊN WEBSITE]** (tạm gọi **Xưởng IoT**).
+- Khẩu hiệu: **"Tự tay làm đồ vật thông minh"**.
+- Đối tượng chính:
+  - Học sinh THCS, THPT (12–18 tuổi) tại Việt Nam.
+  - Sinh viên năm nhất.
+  - Giáo viên STEM.
+  - Ưu tiên cả người mới bắt đầu, thiết bị yếu, và điện thoại.
+- Mục tiêu học tập:
+  - Học IoT với ESP32 mà chưa cần mua linh kiện.
+  - Khi cần mua thì biết chọn gì, nối thế nào, và tránh hỏng.
+- Giá trị cốt lõi:
+  - Đơn giản trước hết.
+  - Mỗi trang tập trung một việc chính.
+  - Không bắt buộc đăng ký tài khoản.
+  - Không thu thập dữ liệu cá nhân.
+  - Không quảng cáo.
+  - Tiếng Việt là ngôn ngữ chính.
+- Tính năng chính:
+  - Lộ trình 10 bài học.
+  - Thư viện board và linh kiện (sơ đồ chân, cách nối, module kết hợp).
+  - Phòng lab mô phỏng nối dây + chạy code có gợi ý và cảnh báo.
+  - Dự án theo từng bước.
+  - Quiz kiểm tra nhanh.
+  - Theo dõi tiến độ và huy hiệu.
+  - Xuất/nhập bài làm.
+- Ngoài phạm vi (không làm):
+  - Diễn đàn.
+  - Nhắn tin giữa học sinh.
+  - Bán hàng.
+  - Đăng nhập mạng xã hội.

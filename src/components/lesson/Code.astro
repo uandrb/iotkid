@@ -1,0 +1,94 @@
+---
+interface Props {
+	code: string;
+	language?: string;
+}
+
+const { code, language = 'cpp' } = Astro.props;
+const lines = code.trim().split('\n');
+const codeId = `code-${Math.random().toString(36).slice(2, 10)}`;
+---
+
+<section class="lesson-block">
+	<div class="code-header">
+		<h2>Code</h2>
+		<button type="button" class="copy-btn" data-target={codeId}>Sao chép</button>
+	</div>
+	<div class="code-shell" id={codeId} data-code={code} data-lang={language}>
+		<ol>
+			{
+				lines.map((line) => (
+					<li><code>{line || ' '}</code></li>
+				))
+			}
+		</ol>
+	</div>
+</section>
+
+<script>
+	document.querySelectorAll('.copy-btn').forEach((button) => {
+		button.addEventListener('click', async () => {
+			const targetId = button.dataset.target;
+			if (!targetId) return;
+			const codeBlock = document.getElementById(targetId);
+			if (!codeBlock) return;
+			try {
+				await navigator.clipboard.writeText(codeBlock.dataset.code ?? '');
+				button.textContent = 'Đã sao chép';
+				setTimeout(() => {
+					button.textContent = 'Sao chép';
+				}, 1500);
+			} catch (error) {
+				console.error('Không thể sao chép code.', error);
+				button.textContent = 'Không sao chép được';
+			}
+		});
+	});
+</script>
+
+<style>
+	.lesson-block {
+		margin-block: var(--space-3);
+	}
+
+	.code-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.copy-btn {
+		min-height: 44px;
+		padding: 8px 14px;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		cursor: pointer;
+		font-weight: 600;
+	}
+
+	.code-shell {
+		margin: 0;
+		padding: var(--space-2);
+		border-radius: var(--radius-md);
+		background: #0d1a26;
+		color: #d8f3ff;
+		overflow-x: auto;
+	}
+
+	ol {
+		margin: 0;
+		padding-left: 2.5rem;
+	}
+
+	li {
+		font-family: var(--font-mono);
+		padding-left: 8px;
+		white-space: pre;
+	}
+
+	code {
+		font-family: inherit;
+	}
+</style>

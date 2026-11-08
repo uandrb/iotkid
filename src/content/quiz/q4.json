@@ -1,0 +1,12 @@
+{
+  "id": "q4",
+  "question": "Nhóm chân nào trên ESP32 DevKit V1 chỉ đọc?",
+  "options": [
+    { "text": "GPIO1-5", "correct": false },
+    { "text": "GPIO12-15", "correct": false },
+    { "text": "GPIO34-39", "correct": true },
+    { "text": "GPIO21-23", "correct": false }
+  ],
+  "explanation": "GPIO34–39 là input-only, không xuất digital/PWM.",
+  "lessonLink": "/bai-hoc/nut-nhan-bat-den"
+}

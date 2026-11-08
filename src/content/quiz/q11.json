@@ -1,0 +1,12 @@
+{
+  "id": "q11",
+  "question": "Còi buzzer trong bài báo động cửa mở thường nối thế nào?",
+  "options": [
+    { "text": "SIG vào GPIO output, còn lại về GND", "correct": true },
+    { "text": "Nối thẳng 220V", "correct": false },
+    { "text": "Chỉ cần 1 dây duy nhất", "correct": false },
+    { "text": "Nối song song vào SDA/SCL", "correct": false }
+  ],
+  "explanation": "Buzzer module cơ bản cần dây tín hiệu và dây mass.",
+  "lessonLink": "/du-an/bao-dong-cua-mo"
+}

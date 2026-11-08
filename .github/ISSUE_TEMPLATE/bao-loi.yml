@@ -1,0 +1,45 @@
+name: "Báo lỗi"
+description: "Báo lỗi khi dùng website hoặc nội dung bài học"
+title: "[Lỗi]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: mo-ta
+    attributes:
+      label: Mô tả lỗi
+      description: Mô tả ngắn gọn lỗi em gặp.
+      placeholder: Ví dụ: Khi vào Phòng Lab và bấm Chạy thì không có phản hồi.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tai-hien
+    attributes:
+      label: Các bước tái hiện
+      description: Ghi từng bước để đội dự án có thể lặp lại lỗi.
+      placeholder: |
+        1. Vào trang ...
+        2. Bấm ...
+        3. Thấy lỗi ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: ky-vong
+    attributes:
+      label: Kết quả mong muốn
+      placeholder: Em mong muốn khi bấm Chạy thì LED sáng/tắt theo code.
+    validations:
+      required: true
+
+  - type: input
+    id: thiet-bi
+    attributes:
+      label: Thiết bị và trình duyệt
+      placeholder: Ví dụ: Android + Chrome 130, hoặc Windows + Edge
+
+  - type: textarea
+    id: bo-sung
+    attributes:
+      label: Thông tin bổ sung
+      description: Ảnh chụp màn hình/log lỗi (nếu có).

@@ -1,0 +1,37 @@
+---
+title: "Cây tự tưới"
+slug: "cay-tu-tuoi"
+level: "Khó"
+board: "esp32"
+modules:
+  - cam-bien-do-am-dat
+  - relay-1-kenh-cach-ly
+thoiGian: "120–150 phút"
+anhBia: "/images/projects/cay-tu-tuoi.svg"
+labPreset: "tram-thoi-tiet"
+steps: 8
+danhSachMua:
+  - id: cam-bien-do-am-dat
+    soLuong: 1
+  - id: relay-1-kenh-cach-ly
+    soLuong: 1
+---
+
+Dự án giúp em đọc độ ẩm đất và kích relay để bật bơm theo ngưỡng.
+
+## Các bước ráp chính
+
+- Nối cảm biến độ ẩm đất vào nguồn và chân ADC.
+- Nối chân IN của relay vào một GPIO output.
+- Viết ngưỡng độ ẩm để quyết định bật/tắt relay.
+- Chống nhấp nháy relay bằng vùng trễ đơn giản.
+- In log trạng thái để theo dõi.
+- Thử nhiều mức đất khô/ẩm.
+- Tách code phần đọc cảm biến và phần điều khiển.
+- Kiểm tra lại an toàn nguồn trước khi dùng ngoài đời.
+
+## Khi làm thật
+
+- **Không tự đấu điện lưới 220V** trong dự án học sinh.
+- Dùng bơm mini điện áp thấp và nguồn cách ly phù hợp.
+- Mối nối relay cần chắc, cách điện, và có hộp bảo vệ.

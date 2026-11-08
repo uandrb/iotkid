@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" role="img" aria-label="Breadboard mini">
+  <rect x="8" y="8" width="144" height="84" rx="12" fill="#f5f7fb" stroke="#cbd5e1" />
+  <g fill="#94a3b8">
+    <circle cx="28" cy="28" r="2.2"/><circle cx="40" cy="28" r="2.2"/><circle cx="52" cy="28" r="2.2"/>
+    <circle cx="64" cy="28" r="2.2"/><circle cx="76" cy="28" r="2.2"/><circle cx="88" cy="28" r="2.2"/>
+    <circle cx="100" cy="28" r="2.2"/><circle cx="112" cy="28" r="2.2"/><circle cx="124" cy="28" r="2.2"/>
+    <circle cx="28" cy="72" r="2.2"/><circle cx="40" cy="72" r="2.2"/><circle cx="52" cy="72" r="2.2"/>
+    <circle cx="64" cy="72" r="2.2"/><circle cx="76" cy="72" r="2.2"/><circle cx="88" cy="72" r="2.2"/>
+    <circle cx="100" cy="72" r="2.2"/><circle cx="112" cy="72" r="2.2"/><circle cx="124" cy="72" r="2.2"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+{
+  "id": "q3",
+  "question": "Khi dùng INPUT_PULLUP, trạng thái chân nút khi chưa nhấn là gì?",
+  "options": [
+    { "text": "LOW", "correct": false },
+    { "text": "HIGH", "correct": true },
+    { "text": "Ngẫu nhiên", "correct": false },
+    { "text": "3 trạng thái", "correct": false }
+  ],
+  "explanation": "INPUT_PULLUP kéo mức chân lên HIGH khi chưa nhấn.",
+  "lessonLink": "/bai-hoc/nut-nhan-bat-den"
+}
