@@ -1,0 +1,9 @@
+name = "xuong-iot"
+compatibility_date = "2026-11-08"
+
+[assets]
+directory = "./dist"
+not_found_handling = "404-page"
+
+[env.production]
+name = "xuong-iot"

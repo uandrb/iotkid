@@ -3,6 +3,11 @@ import MainLayout from '../layouts/MainLayout.astro';
 import { getVisibleLessons } from '../lib/lessons';
 
 const lessons = await getVisibleLessons();
+const roadmapLessons = [...lessons].sort((a, b) => {
+	if (a.data.slug === 'gioi-thieu-va-chon-board-esp32') return -1;
+	if (b.data.slug === 'gioi-thieu-va-chon-board-esp32') return 1;
+	return a.data.order - b.data.order;
+});
 ---
 
 <MainLayout title="Lộ trình | Xưởng IoT">
@@ -11,7 +16,7 @@ const lessons = await getVisibleLessons();
 
 	<ol class="roadmap">
 		{
-			lessons.map((lesson) => (
+			roadmapLessons.map((lesson) => (
 				<li class="roadmap-item" data-slug={lesson.data.slug}>
 					<p class="order">Bài {lesson.data.order}</p>
 					<h2>

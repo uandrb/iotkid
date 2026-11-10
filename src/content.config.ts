@@ -9,7 +9,7 @@ const lessons = defineCollection({
 			.string()
 			.min(1, 'Thiếu slug bài học.')
 			.regex(/^[a-z0-9-]+$/, 'slug chỉ dùng chữ thường không dấu, số và dấu gạch ngang.'),
-		order: z.number().int().positive(),
+		order: z.number().int().nonnegative(),
 		level: z.enum(['Dễ', 'Vừa', 'Khó']),
 		durationMinutes: z.number().int().positive(),
 		board: z.enum(['esp32', 'esp32s3']),
