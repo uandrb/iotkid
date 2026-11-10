@@ -1,0 +1,118 @@
+---
+title: "Bài 0: ESP32 là gì và chọn board nào?"
+slug: "gioi-thieu-va-chon-board-esp32"
+order: 0
+level: "Dễ"
+durationMinutes: 25
+board: "esp32"
+modules: []
+goals:
+  - "Biết ESP32 là gì và vì sao được dùng nhiều trong IoT"
+  - "Phân biệt SoC, Module và DevKit"
+  - "Chọn đúng dòng ESP32 cho dự án của em"
+labPreset: ""
+draft: false
+---
+
+## ESP32 là gì?
+
+ESP32 là dòng vi điều khiển (microcontroller) 32-bit giá rẻ của hãng Espressif, tích hợp sẵn Wi-Fi và Bluetooth trên cùng một con chip. Chỉ với một bo mạch giá vài trăm nghìn đồng, em có thể làm thiết bị IoT, robot, trợ lý giọng nói hay trạm thời tiết kết nối Internet.
+
+ESP32 phổ biến vì 4 lý do:
+
+- **Rẻ và dễ mua:** bo phát triển có giá khoảng 100–300 nghìn đồng.
+- **Mạnh hơn Arduino Uno nhiều lần:** CPU 32-bit đến 240 MHz, RAM hàng trăm KB.
+- **Có sẵn kết nối không dây:** Wi-Fi, Bluetooth; một số dòng mới có Wi-Fi 6, Thread/Zigbee.
+- **Cộng đồng lớn:** lập trình được bằng Arduino, ESP-IDF, MicroPython; rất nhiều thư viện và bài hướng dẫn.
+
+## ESP32 ra đời thế nào?
+
+ESP32 ra mắt ngày 6/9/2016, là người kế nhiệm chip Wi-Fi ESP8266 (2014). Cả hai do Espressif Systems, công ty bán dẫn ở Thượng Hải (Trung Quốc), thiết kế.
+
+| Năm | Mốc | Ý nghĩa |
+| --- | --- | --- |
+| 2014 | ESP8266, module ESP-01 | Wi-Fi giá rẻ, mở đường cho IoT tự làm |
+| 2016 | ESP32 gốc | Lõi kép, Wi-Fi + Bluetooth, trở thành chuẩn DIY |
+| 2019 | ESP32-S2 | USB OTG, không có Bluetooth |
+| 2020 | ESP32-C3 | Lõi RISC-V đầu tiên, rẻ, nhỏ gọn |
+| 2020–2021 | ESP32-S3 | Lõi kép, lệnh tăng tốc AI, hỗ trợ camera/màn hình |
+| 2021 | ESP32-C6, ESP32-H2 | Wi-Fi 6, Thread/Zigbee cho nhà thông minh |
+| 2022 | ESP32-C2 | Bản siêu rẻ thay ESP8266 |
+| 2023–2025 | ESP32-P4, ESP32-C5 | P4 xử lý hình ảnh mạnh; C5 có Wi-Fi 6 băng kép 2.4/5 GHz |
+
+## SoC, Module và DevKit khác nhau thế nào?
+
+Chữ “ESP32” có thể chỉ 3 thứ: con chip, module chứa chip, hoặc bo mạch phát triển gắn module. Em sẽ mua và dùng loại thứ ba, gọi là **DevKit**.
+
+![Ba cấp độ của ESP32: SoC, Module và DevKit. Học sinh mua DevKit.](/images/bai-hoc/soc-module-devkit.svg)
+
+| Tên | Gồm những gì | Ví dụ | Ai dùng |
+| --- | --- | --- | --- |
+| SoC (System on Chip) | Con chip silicon: CPU, RAM, bộ phát Wi-Fi/Bluetooth | ESP32-D0WD-V3, ESP32-S3 | Kỹ sư tự thiết kế bo mạch |
+| Module | SoC + bộ nhớ Flash (một số bản có PSRAM) + thạch anh + anten, nằm dưới nắp kim loại | ESP32-WROOM-32E, ESP32-S3-WROOM-1 N16R8 | Hàn lên sản phẩm thật |
+| Development Board (DevKit) | Module + cổng USB + chip nạp code + nút BOOT/EN + mạch nguồn + hàng chân cắm | ESP32 DevKit V1, ESP32-S3-DevKitC-1 | Học sinh, người học, làm mẫu thử |
+
+<CanhBao loai="meo">
+  Mẹo đọc tên module: N16R8 = 16 MB Flash (N) + 8 MB PSRAM (R). Tên không có chữ R nghĩa là module không có PSRAM.
+</CanhBao>
+
+## Chọn dòng chip nào?
+
+Người mới nên bắt đầu với **ESP32 cổ điển** hoặc **ESP32-C3**. Làm AI, giọng nói, camera thì chọn **ESP32-S3**. Làm nhà thông minh dùng Matter thì chọn **ESP32-C6**.
+
+![Sơ đồ chọn board ESP32 theo nhu cầu dự án.](/images/bai-hoc/chon-board-esp32.svg)
+
+Không chắc thì chọn dòng đầu tiên: ESP32 cổ điển có nhiều bài hướng dẫn nhất, còn ESP32-C3 rẻ và nhỏ hơn.
+
+| Dòng | CPU | Wi-Fi | Bluetooth | Thread / Zigbee | Điểm mạnh | Lưu ý |
+| --- | --- | --- | --- | --- | --- | --- |
+| ESP8266 | 1 lõi Xtensa L106, 80–160 MHz | Wi-Fi 4 | Không | Không | Rẻ, nhiều tài liệu cũ | Espressif không khuyến nghị cho thiết kế mới |
+| ESP32 (cổ điển) | 2 lõi Xtensa LX6, 240 MHz | Wi-Fi 4 | Classic + BLE | Không | Đa năng, nhiều tài liệu nhất; dòng duy nhất có Bluetooth Classic | Hợp người mới |
+| ESP32-C2 | 1 lõi RISC-V, 120 MHz | Wi-Fi 4 | BLE 5 | Không | Rẻ nhất | RAM ít, hợp sản phẩm thương mại hơn là học tập |
+| ESP32-C3 | 1 lõi RISC-V, 160 MHz | Wi-Fi 4 | BLE 5 | Không | Rẻ, nhỏ, tiết kiệm điện; thay thế tốt cho ESP8266 | Hợp người mới |
+| ESP32-C5 | RISC-V, 240 MHz | Wi-Fi 6 băng kép 2.4 + 5 GHz | BLE 5 | Có | Chịu nhiễu tốt ở nơi có nhiều mạng Wi-Fi | Dòng mới, board ở Việt Nam còn ít |
+| ESP32-C6 | RISC-V, 160 MHz | Wi-Fi 6 (chỉ 2.4 GHz) | BLE 5 | Có | Nhà thông minh, chuẩn Matter | Wi-Fi 6 nhưng không có băng 5 GHz |
+| ESP32-S2 | 1 lõi Xtensa LX7, 240 MHz | Wi-Fi 4 | Không | Không | USB OTG: giả lập bàn phím, chuột | Không có Bluetooth |
+| ESP32-S3 | 2 lõi Xtensa LX7, 240 MHz | Wi-Fi 4 | BLE 5 | Không | AI, camera, màn hình, âm thanh, USB OTG | Robot XiaoZhi dùng dòng này |
+| ESP32-H2 | RISC-V, 96 MHz | Không | BLE 5 | Có | Rất tiết kiệm pin | Cần thiết bị cầu nối có Wi-Fi mới lên được Internet |
+| ESP32-P4 | 2 lõi RISC-V, khoảng 360–400 MHz | Không | Không | Không | Xử lý hình ảnh, video, màn hình và camera MIPI | Board thường ghép thêm chip C6 để có Wi-Fi/Bluetooth |
+
+Wi-Fi 4 = chuẩn 802.11n, Wi-Fi 6 = chuẩn 802.11ax. Thông số CPU là mức tối đa, có thể khác nhau giữa các bản chip.
+
+<CanhBao loai="an-toan">
+  Cẩn thận với hình trên mạng: nhiều hình so sánh ESP32 do AI vẽ gán sai tính năng (ví dụ ghi ESP32-P4 có Wi-Fi, ESP32-S2 có Wi-Fi 6). Luôn đối chiếu với bảng này hoặc trang của Espressif.
+</CanhBao>
+
+## Kiểm tra nhanh
+
+<Quiz
+  lessonSlug={frontmatter.slug}
+  quizId="quiz-bai-0"
+  questions={[
+    {
+      id: "q1",
+      question: "Em mới học lập trình ESP32. Nên mua gì: con chip ESP32, module ESP32-WROOM, hay bo ESP32 DevKit?",
+      options: ["Con chip ESP32", "Module ESP32-WROOM", "Bo ESP32 DevKit"],
+      answerIndex: 2,
+      explanation: "Bo ESP32 DevKit. DevKit có sẵn cổng USB để nạp code và chân cắm để gắn lên breadboard. Chip và module cần hàn mạch mới dùng được."
+    },
+    {
+      id: "q2",
+      question: "Dự án robot trả lời bằng giọng nói, có micro và loa, nên chọn dòng nào?",
+      options: ["ESP32", "ESP32-S3", "ESP32-C6"],
+      answerIndex: 1,
+      explanation: "ESP32-S3. Dòng này có lệnh tăng tốc AI, đủ mạnh cho âm thanh và thường có bản kèm 8 MB PSRAM (N16R8)."
+    },
+    {
+      id: "q3",
+      question: "ESP32-P4 có tự kết nối Wi-Fi được không?",
+      options: ["Có", "Không"],
+      answerIndex: 1,
+      explanation: "Không. ESP32-P4 không có Wi-Fi hay Bluetooth bên trong; board P4 thường ghép thêm một chip ESP32-C6 để có kết nối không dây."
+    }
+  ]}
+/>
+
+---
+
+Nguồn: [Wikipedia – ESP32](https://en.wikipedia.org/wiki/ESP32), [Espressif – Cam kết vòng đời sản phẩm](https://www.espressif.com/en/products/longevity-commitment), [JLCPCB – ESP32 Complete Guide](https://jlcpcb.com/blog/esp32-complete-guide).

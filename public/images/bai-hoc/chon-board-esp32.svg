@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 412" role="img" aria-labelledby="t d" font-family="'Be Vietnam Pro', Arial, sans-serif" font-size="13">
+  <title id="t">Người mới bắt đầu nên chọn ESP32 hoặc ESP32-C3</title>
+  <desc id="d">Chọn board theo dự án: mới học thì ESP32 hoặc ESP32-C3; AI, giọng nói, camera, màn hình thì ESP32-S3; nhà thông minh, Matter, Zigbee thì ESP32-C6; nơi nhiều Wi-Fi cần băng 5 GHz thì ESP32-C5; chạy pin lâu không cần Wi-Fi thì ESP32-H2; màn hình, camera hiệu năng cao thì ESP32-P4 kèm chip Wi-Fi.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9aa3ae"/></marker>
+  </defs>
+  <rect width="760" height="412" fill="#fbf8f1"/>
+  <text x="24" y="30" font-size="15" font-weight="700" fill="#1c2433">Người mới bắt đầu nên chọn ESP32 hoặc ESP32-C3</text>
+  <text x="24" y="50" font-size="11.5" fill="#5b6475">Tìm dòng giống dự án của em nhất, đi theo mũi tên để ra board nên mua</text>
+  <g fill="none" stroke="#9aa3ae" stroke-width="1.4">
+    <path d="M174 232H202V92H226" marker-end="url(#a)"/>
+    <path d="M202 148H226" marker-end="url(#a)"/>
+    <path d="M202 204H226" marker-end="url(#a)"/>
+    <path d="M202 232V372H226" marker-end="url(#a)"/>
+    <path d="M202 260H226" marker-end="url(#a)"/>
+    <path d="M202 316H226" marker-end="url(#a)"/>
+    <path d="M494 92H540" marker-end="url(#a)"/><path d="M494 148H540" marker-end="url(#a)"/><path d="M494 204H540" marker-end="url(#a)"/>
+    <path d="M494 260H540" marker-end="url(#a)"/><path d="M494 316H540" marker-end="url(#a)"/><path d="M494 372H540" marker-end="url(#a)"/>
+  </g>
+  <rect x="24" y="202" width="150" height="60" rx="10" fill="#ffffff" stroke="#c9c0ad" stroke-width="1.25"/>
+  <text x="99" y="228" text-anchor="middle" font-weight="700" fill="#1c2433">Dự án của em</text>
+  <text x="99" y="246" text-anchor="middle" font-weight="700" fill="#1c2433">cần gì?</text>
+  <g fill="#ffffff" stroke="#c9c0ad" stroke-width="1.25">
+    <rect x="230" y="72" width="264" height="40" rx="10"/><rect x="230" y="128" width="264" height="40" rx="10"/><rect x="230" y="184" width="264" height="40" rx="10"/>
+    <rect x="230" y="240" width="264" height="40" rx="10"/><rect x="230" y="296" width="264" height="40" rx="10"/><rect x="230" y="352" width="264" height="40" rx="10"/>
+    <rect x="544" y="128" width="192" height="40" rx="10"/><rect x="544" y="184" width="192" height="40" rx="10"/>
+    <rect x="544" y="240" width="192" height="40" rx="10"/><rect x="544" y="296" width="192" height="40" rx="10"/><rect x="544" y="352" width="192" height="40" rx="10"/>
+  </g>
+  <rect x="544" y="72" width="192" height="40" rx="10" fill="#e6f4f1" stroke="#0f766e" stroke-width="2"/>
+  <g fill="#1c2433">
+    <text x="246" y="96.5">Mới học, làm dự án chung</text>
+    <text x="246" y="152.5">AI, giọng nói, camera, màn hình</text>
+    <text x="246" y="208.5">Nhà thông minh, Matter, Zigbee</text>
+    <text x="246" y="264.5">Nơi nhiều Wi-Fi, cần băng 5 GHz</text>
+    <text x="246" y="320.5">Chạy pin lâu, không cần Wi-Fi</text>
+    <text x="246" y="376.5">Màn hình, camera hiệu năng cao</text>
+  </g>
+  <g fill="#1c2433" font-weight="700" text-anchor="middle">
+    <text x="640" y="96.5">ESP32 hoặc ESP32-C3</text>
+    <text x="640" y="152.5">ESP32-S3</text>
+    <text x="640" y="208.5">ESP32-C6</text>
+    <text x="640" y="264.5">ESP32-C5</text>
+    <text x="640" y="320.5">ESP32-H2</text>
+    <text x="640" y="376.5">ESP32-P4 + chip Wi-Fi</text>
+  </g>
+</svg>
